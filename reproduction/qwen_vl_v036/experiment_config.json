@@ -1,0 +1,49 @@
+{
+  "version": "v0.36",
+  "scope": "DriveLM-nuScenes single current frame and six synchronized cameras",
+  "data": {
+    "train_jsonl": "/mnt/data/zzy/drivelm/reproduction/qwen_vl_stage2_ablation_v1/qwen_v033_c00_train.jsonl",
+    "dev_jsonl": "/mnt/data/zzy/drivelm/reproduction/qwen_vl_stage2_ablation_v1/qwen_v033_c00_dev.jsonl",
+    "train_qa": 26095,
+    "dev_qa": 3355,
+    "history": false,
+    "radar": false,
+    "lidar": false,
+    "roi": false,
+    "oracle_metadata": false
+  },
+  "objective": {
+    "type": "pure assistant-token autoregressive cross entropy",
+    "tag_weights": null,
+    "metric_weights": null,
+    "judge_reward": null,
+    "graph_gating_in_loss": false
+  },
+  "controlled_matrix": [
+    {"id": "B00", "model": "Qwen2.5-VL-3B-Instruct", "visual_tokens_per_image": 128},
+    {"id": "B10", "model": "Qwen2.5-VL-7B-Instruct", "visual_tokens_per_image": 128},
+    {"id": "B11", "model": "Qwen2.5-VL-7B-Instruct", "visual_tokens_per_image": 256, "optional": true}
+  ],
+  "execution_policy": {
+    "primary_goal": "complete and audit the B10 end-to-end training/evaluation pipeline",
+    "b11_gate": "run only after B10 completes and diagnostics justify a higher visual budget",
+    "b12": "cancelled"
+  },
+  "controlled_training": {
+    "epochs": 1,
+    "effective_global_batch_size": 4,
+    "learning_rate": 0.0002,
+    "weight_decay": 0.0,
+    "lora_rank": 8,
+    "lora_alpha": 16,
+    "lora_dropout": 0.05,
+    "max_length": 4096,
+    "seed": 42
+  },
+  "promotion": {
+    "baseline": "v0.35 CE/OA tag router",
+    "minimum_absolute_final_gain": 0.003,
+    "minimum_prediction_coverage": 1.0,
+    "minimum_graph_eligible": 1919
+  }
+}

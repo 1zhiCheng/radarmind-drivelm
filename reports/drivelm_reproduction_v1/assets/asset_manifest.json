@@ -1,0 +1,18 @@
+{
+  "sources": {
+    "/mnt/data/zzy/drivelm/reproduction/qwen_vl/dataset_report.json": "acdce2d16b9545250043115508a7c59363ac45106b8a70f93fa392c1bb1b886d",
+    "/mnt/data/zzy/drivelm/reproduction/qwen_vl/dev_metrics.json": "7845377b8c9afbb98c277420f245301f13e195a3ab3c51f2697d602fc5c9a081",
+    "/mnt/data/zzy/drivelm/reproduction/qwen_vl/dev_error_analysis.json": "5597c797aaed0b3b5e1e03217bb1b36855bad9c82e28cdce1b576ccd38383555",
+    "/mnt/data/zzy/drivelm/reproduction/qwen_vl/resume_gpu1_from_3000.log": "8faaa87b2e7fe37ee4c9d2e5d3bd0acf1413ff3f61625951ba8cb29cde8730f2"
+  },
+  "outputs": [
+    "continuation_mean_loss.png",
+    "dataset_task_distribution.png",
+    "metrics_by_task.png",
+    "model_architecture.png",
+    "qualitative_continuous_demos.jpg",
+    "question_family_f1.png",
+    "reproduction_pipeline.png",
+    "six_camera_input.jpg"
+  ]
+}
