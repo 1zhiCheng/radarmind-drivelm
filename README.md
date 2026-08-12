@@ -14,13 +14,24 @@ Single-frame six-view perception · Graph-VQA · Qwen2.5-VL LoRA · pure CE SFT 
 
 </div>
 
+### Scene 1 · daytime urban driving
+
 <p align="center">
-  <img src="assets/demo/drivelm_preview.gif" width="820" alt="RadarMind DriveLM continuous reasoning demo">
+  <a href="assets/video/RadarMind_DriveLM_continuous.mp4">
+    <img src="assets/demo/drivelm_preview.gif" width="820" alt="RadarMind DriveLM daytime continuous reasoning demo">
+  </a>
+</p>
+
+### Scene 2 · wet night with a crossing pedestrian
+
+<p align="center">
+  <a href="assets/video/RadarMind_DriveLM_scene1094_continuous.mp4">
+    <img src="assets/demo/drivelm_scene1094_preview.gif" width="820" alt="RadarMind DriveLM wet-night continuous reasoning demo">
+  </a>
 </p>
 
 <p align="center">
-  <a href="assets/video/RadarMind_DriveLM_continuous.mp4">32 s demo</a> ·
-  <a href="assets/video/RadarMind_DriveLM_scene1094_continuous.mp4">wet-night demo</a> ·
+  Click either preview for the complete 32 s MP4 ·
   <a href="reports/drivelm_reproduction_v1/drivelm_reproduction_technical_report.pdf">technical report</a>
 </p>
 
