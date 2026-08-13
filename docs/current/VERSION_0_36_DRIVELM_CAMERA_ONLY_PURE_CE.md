@@ -1,7 +1,7 @@
 # RadarMind v0.36：DriveLM 单帧六相机纯 CE 强基座实验
 
 日期：2026-08-12
-状态：B00 已训练并完成全量评测，不晋级；B10 权重准备中
+状态：B00、B10、B11 均已完成全量训练与评测；B10 保留，B11 不晋级
 
 ## 1. 目标和边界
 
@@ -23,8 +23,8 @@ L_CE = - sum_t log p(answer_t | six cameras, question, answer_<t)
 | ID | 基座 | 每图最大视觉 token | 当前状态 |
 | --- | --- | ---: | --- |
 | B00 | Qwen2.5-VL-3B-Instruct | 128 | 完成，控制组，不晋级 |
-| B10 | Qwen2.5-VL-7B-Instruct | 128 | 权重准备中 |
-| B11 | Qwen2.5-VL-7B-Instruct | 256 | 可选，仅在 B10 诊断证明有必要时执行 |
+| B10 | Qwen2.5-VL-7B-Instruct | 128 | 已完成，v0.36 最优 |
+| B11 | Qwen2.5-VL-7B-Instruct | 256 | 已完成，不晋级 |
 
 B12 已取消。B00 不是为了替代 C00，而是为 B10/B11 建立相同 camera-only prompt、纯 CE
 训练器和 DDP 路径下的容量控制组。
@@ -34,7 +34,7 @@ B12 已取消。B00 不是为了替代 C00，而是为 B10/B11 建立相同 came
 代码目录：
 
 ```text
-/path/to/radarmind-drivelm/reproduction/qwen_vl_v036
+/home/zhangzongyuan/Myproject/drivelm/DriveLM-main/reproduction/qwen_vl_v036
 ```
 
 训练器明确复用 `reproduction/qwen_vl/common.py` 的 camera-only collator，不再
@@ -82,7 +82,7 @@ B12 已取消。B00 不是为了替代 C00，而是为 B10/B11 建立相同 came
 模型产物：
 
 ```text
-$DRIVELM_ROOT/models/qwen2.5-vl-3b-drivelm-v036-b00-seed42
+/mnt/data/zzy/drivelm/models/qwen2.5-vl-3b-drivelm-v036-b00-seed42
 ```
 
 目录内包含 adapter、processor、训练报告和带 optimizer state 的
@@ -130,7 +130,7 @@ Match 都低于 C00-CE。因此 B00 未满足以下晋级条件：
 这也说明仅比较 EM/F1/ROUGE-L 会得到错误结论；模型选择必须同时看公开
 DriveLM 结构、gating 数量和固定共同 eligible 子集。
 
-## 7. 结论和下一步
+## 7. B00 后的既定执行计划（已完成）
 
 1. B00 作为 v0.36 camera-only 纯 CE 控制组永久保留，不替换 v0.35 router；
 2. 不因为 B00 退化就修改损失函数，B10 仍保持完全相同的纯 CE，先单独检验
@@ -145,9 +145,55 @@ DriveLM 结构、gating 数量和固定共同 eligible 子集。
 评测产物：
 
 ```text
-$DRIVELM_ROOT/reproduction/qwen_vl_v036/b00_dev_predictions.json
-$DRIVELM_ROOT/reproduction/qwen_vl_v036/b00_dev_metrics.json
-$DRIVELM_ROOT/reproduction/qwen_vl_v036/b00_drivelm_ds.json
-$DRIVELM_ROOT/reproduction/qwen_vl_v036/paired_c00ce_vs_b00.json
-$DRIVELM_ROOT/reproduction/qwen_vl_v036/paired_c00ce_vs_b00.md
+/mnt/data/zzy/drivelm/reproduction/qwen_vl_v036/b00_dev_predictions.json
+/mnt/data/zzy/drivelm/reproduction/qwen_vl_v036/b00_dev_metrics.json
+/mnt/data/zzy/drivelm/reproduction/qwen_vl_v036/b00_drivelm_ds.json
+/mnt/data/zzy/drivelm/reproduction/qwen_vl_v036/paired_c00ce_vs_b00.json
+/mnt/data/zzy/drivelm/reproduction/qwen_vl_v036/paired_c00ce_vs_b00.md
+```
+
+
+## 8. B10/B11 最终验收（2026-08-13）
+
+两组均使用相同的 26,095 条 QA、纯 assistant-token CE、有效全局 batch 4、
+LoRA rank 8 和 seed 42。唯一受控变量为每路相机视觉预算。
+
+| 项目 | B10：128 token/image | B11：256 token/image |
+| --- | ---: | ---: |
+| updates | 6,524 | 6,524 |
+| mean train loss | 0.27292 | 0.27545 |
+| 训练耗时 | 3.13 h | 5.50 h |
+| dev coverage | 100% | 100% |
+| Exact Match | 43.46% | 42.77% |
+| Token-F1 | 73.00% | 72.75% |
+| ROUGE-L | 71.08% | 70.93% |
+| 多选准确率 | 83.82% | 82.02% |
+| graph eligible | 1,889 | 1,779 |
+| DriveLM-DS Accuracy | 79.91% | 75.55% |
+| Planning (DeepSeek/100) | 70.63 | 70.68 |
+| Language | 0.4760 | 0.4539 |
+| coordinate F1 | 13.13% | 12.12% |
+| Graph (DeepSeek/100) | 43.94 | 44.17 |
+| Match (/100) | 28.54 | 28.14 |
+| DriveLM-DS Final | **0.59464** | **0.58088** |
+
+B10 judge 为 770/770，B11 judge 为 723/723，均为 100% 完成且无失败。
+DriveLM-DS 使用 DeepSeek-V4-Flash 替代官方 GPT judge，是本地公开结构代理分数，
+不是隐藏测试服务器成绩。
+
+B11 的 Planning 与 Graph 语义项有极小提升，但 graph eligible 减少 110，
+且 Accuracy、Language、coordinate F1、Match 和 Final 同时下降；其训练耗时增加
+约 75.5%。因此更高视觉预算未带来总体收益，v0.36 选择 B10，B11 保留为
+完整负结果，不进入下一阶段。
+
+最终产物：
+
+```text
+/mnt/data/zzy/drivelm/models/qwen2.5-vl-7b-drivelm-v036-b10-seed42
+/mnt/data/zzy/drivelm/models/qwen2.5-vl-7b-drivelm-v036-b11-seed42
+/mnt/data/zzy/drivelm/reproduction/qwen_vl_v036/b10_dev_metrics.json
+/mnt/data/zzy/drivelm/reproduction/qwen_vl_v036/b10_drivelm_ds.json
+/mnt/data/zzy/drivelm/reproduction/qwen_vl_v036/b11_dev_metrics.json
+/mnt/data/zzy/drivelm/reproduction/qwen_vl_v036/b11_drivelm_ds.json
+/mnt/data/zzy/drivelm/reproduction/qwen_vl_v036/paired_b10_vs_b11.json
 ```

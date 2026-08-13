@@ -30,7 +30,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-json", type=Path, required=True)
     parser.add_argument(
         "--secret-file", type=Path,
-        default=Path.home() / ".config" / "radarmind" / "deepseek_api_key",
+        default=Path("/home/zhangzongyuan/.config/radarmind/deepseek_api_key"),
     )
     parser.add_argument("--cache-file", type=Path, required=True)
     parser.add_argument("--model", default="deepseek-v4-flash")
@@ -268,6 +268,12 @@ def main() -> None:
         "cache_hits": report["judge"]["cache_hits"],
         "drivelm_ds_final": final_score,
     }, indent=2))
+    if not args.judge_limit and not complete_judging:
+        raise RuntimeError(
+            "Semantic judging is incomplete: "
+            f"completed={len(judge_results)}/{len(judge_records)}, "
+            f"failures={len(judge_failures)}"
+        )
 
 
 if __name__ == "__main__":

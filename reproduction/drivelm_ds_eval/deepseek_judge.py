@@ -162,9 +162,14 @@ brief string field brief_reason. Do not include chain-of-thought."""
         values: dict[str, int] = {}
         for field in required_scores:
             value = payload.get(field)
-            if isinstance(value, bool) or not isinstance(value, (int, float)):
+            if isinstance(value, bool):
+                if field == "score":
+                    raise ValueError(f"Judge field {field} is not numeric: {value!r}")
+                rounded = 100 if value else 0
+            elif isinstance(value, (int, float)):
+                rounded = int(round(float(value)))
+            else:
                 raise ValueError(f"Judge field {field} is not numeric: {value!r}")
-            rounded = int(round(float(value)))
             if not 0 <= rounded <= 100:
                 raise ValueError(f"Judge field {field} is outside [0, 100]: {rounded}")
             values[field] = rounded
@@ -211,4 +216,7 @@ brief string field brief_reason. Do not include chain-of-thought."""
                 last_error = error
                 if attempt < self.max_retries:
                     time.sleep(min(2 ** (attempt - 1), 4))
-        raise RuntimeError(f"DeepSeek judge failed after {self.max_retries} attempts") from last_error
+        raise RuntimeError(
+            f"DeepSeek judge failed after {self.max_retries} attempts: "
+            f"{type(last_error).__name__}: {last_error}"
+        ) from last_error
