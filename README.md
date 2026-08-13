@@ -10,7 +10,7 @@
 [![CI](https://github.com/1zhiCheng/radarmind-drivelm/actions/workflows/ci.yml/badge.svg)](https://github.com/1zhiCheng/radarmind-drivelm/actions)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 
-Single-frame six-view perception · Graph-VQA · Qwen2.5-VL LoRA · pure CE SFT · local DriveLM-DS evaluation
+Single-frame six-view perception · Graph-VQA · Qwen2.5-VL LoRA · CE SFT + conservative DPO · local DriveLM-DS evaluation
 
 </div>
 
@@ -42,6 +42,7 @@ The upstream DriveLM release provides data and challenge utilities, but not a co
 - deterministic scene-isolated train/dev construction with leakage checks;
 - six independent camera inputs in the fixed `front / front-left / front-right / back / back-left / back-right` order;
 - assistant-token-only autoregressive cross-entropy LoRA SFT;
+- task-balanced conservative DPO with a chosen-answer CE anchor;
 - single-GPU baseline and multi-GPU `accelerate` training;
 - resumable 3,355-QA inference with 100% coverage accounting;
 - lexical evaluation plus a cached DeepSeek replacement for the unavailable GPT semantic judge;
@@ -101,11 +102,28 @@ The complete train-only preference pipeline produced 7,149 leakage-free pairs fr
 | DPO step 300 | 43.49% | 73.12% | 71.02% | 83.93% | 66.42 | 0.57561 |
 | DPO step 596 | 42.98% | 71.76% | 69.40% | **84.83%** | 66.52 | 0.55330 |
 
-DPO improved multiple-choice accuracy but did not pass the Final and planning promotion gates. B10 remains the active checkpoint. See the [full v0.37A report](docs/current/VERSION_0_37A_DRIVELM_B10_DPO.md); the next controlled experiment is [v0.37B conservative DPO](docs/current/VERSION_0_37B_DRIVELM_CONSERVATIVE_DPO_PLAN.md).
+DPO improved multiple-choice accuracy but did not pass the Final and planning promotion gates. See the [full v0.37A report](docs/current/VERSION_0_37A_DRIVELM_B10_DPO.md).
+
+### v0.37B task-balanced, CE-anchored DPO
+
+v0.37B returned to the original B10 adapter, balanced the four DriveLM task families at 1,026 train-only preference pairs each, reduced `beta` and learning rate, and added a chosen-answer CE anchor. All four saved checkpoints were evaluated on all 3,355 dev QA before a frozen selector chose step 75. DeepSeek was called only for this selected candidate.
+
+| Metric | B10 | **v0.37B step 75** | Delta |
+| --- | ---: | ---: | ---: |
+| Coverage | 100% | 100% | 0 |
+| Exact Match | 43.4575% | **43.5768%** | +0.1193pp |
+| Token-F1 | 73.0000% | **73.1231%** | +0.1232pp |
+| ROUGE-L | 71.0756% | **71.2034%** | +0.1278pp |
+| MC accuracy | 83.8202% | **84.1573%** | +0.3371pp |
+| Planning /100 | 70.6348 | **70.8571** | +0.2223 |
+| Coordinate F1 | 13.1313% | **13.3838%** | +0.2525pp |
+| DriveLM-DS Final | 0.594636 | **0.596356** | +0.001721 |
+
+The semantic judge completed **762/762** required items with zero failures. Final, planning, coordinate, MC, coverage and judge-completeness gates all passed, so **v0.37B step 75 is the current local-dev checkpoint**. The gain is deliberately reported as a controlled local result, not an official hidden-server score. See the [complete report](docs/current/VERSION_0_37B_DRIVELM_CONSERVATIVE_DPO.md), [reproduction guide](reproduction/qwen_vl_v037b/README.md) and [machine-readable results](results/v037b/).
 
 ## Project status and TODO
 
-Active route: single-frame six-camera DriveLM-nuScenes, with B10 as the frozen post-training baseline.
+Active route: single-frame six-camera DriveLM-nuScenes, with v0.37B step 75 as the current local-dev checkpoint and B10 retained as the frozen control.
 
 - [x] Prepare the **26,095 train / 3,355 scene-isolated dev** dataset.
 - [x] Complete B00/B10/B11 CE-LoRA training and evaluation.
@@ -115,8 +133,10 @@ Active route: single-frame six-camera DriveLM-nuScenes, with B10 as the frozen p
 - [x] Precompute frozen-B10 reference log-probabilities with 100% pair coverage.
 - [x] Train B10-DPO on three RTX 5090 GPUs and evaluate five intermediate checkpoints.
 - [x] Complete 3,355-QA dev and DeepSeek evaluation; DPO did not pass the promotion gate.
-- [ ] Run v0.37B task-balanced, CE-anchored conservative DPO from the original B10.
-- [ ] Consider MoL only if the controlled single-LoRA experiment confirms reproducible task conflict.
+- [x] Run v0.37B task-balanced, CE-anchored conservative DPO and sweep four checkpoints.
+- [x] Promote **v0.37B step 75** after all frozen gates pass: Final **0.59636**.
+- [ ] Build v0.38 train-only graph/coordinate hard examples and run a controlled grounding ablation.
+- [ ] Consider short GRPO only after v0.38 passes the same full-dev gates; MoL remains out of scope without evidence of expert-worthy task conflict.
 
 ### Earlier v0.31 reproduction baseline
 
@@ -255,10 +275,12 @@ challenge/                    official DriveLM extraction and evaluation tools
 reproduction/qwen_vl/        dataset, single-GPU SFT, inference and lexical eval
 reproduction/qwen_vl_v036/   controlled pure-CE multi-GPU trainer
 reproduction/qwen_vl_v037a/  candidate generation, preference audit and DPO
+reproduction/qwen_vl_v037b/  balanced, CE-anchored conservative DPO and selection
 reproduction/drivelm_ds_eval local structural/semantic proxy evaluator
 docs/current/                 current experiment contracts and results
 docs/demos/                   continuous-video reproduction notes
 reports/                      illustrated Chinese technical report
+results/v037b/                compact, machine-readable v0.37B experiment manifests
 assets/                       preview images and full MP4 demos
 ```
 

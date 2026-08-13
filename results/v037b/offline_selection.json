@@ -1,0 +1,119 @@
+{
+  "schema_version": "drivelm-v037b-offline-selection-v1",
+  "baseline": {
+    "coverage": 1.0,
+    "exact_match": 0.434575260804769,
+    "token_f1": 0.7299993365355045,
+    "rouge_l": 0.7107563128041837,
+    "planning_token_f1": 0.584330691464923,
+    "mc_accuracy": 0.8382022471910112
+  },
+  "candidates": [
+    {
+      "step": 25,
+      "metrics": {
+        "coverage": 1.0,
+        "exact_match": 0.4342771982116244,
+        "token_f1": 0.7294100250841611,
+        "rouge_l": 0.7100692503397552,
+        "planning_token_f1": 0.5829281260616731,
+        "mc_accuracy": 0.8370786516853933
+      },
+      "delta": {
+        "coverage": 0.0,
+        "exact_match": -0.00029806259314457684,
+        "token_f1": -0.0005893114513434439,
+        "rouge_l": -0.0006870624644285117,
+        "planning_token_f1": -0.0014025654032499002,
+        "mc_accuracy": -0.0011235955056179137
+      },
+      "pre_judge_gates": {
+        "coverage_100_percent": true,
+        "token_f1_not_below_b10": false,
+        "planning_token_f1_not_below_b10": false,
+        "mc_improved_over_b10": false
+      },
+      "eligible_for_judge": false
+    },
+    {
+      "step": 50,
+      "metrics": {
+        "coverage": 1.0,
+        "exact_match": 0.43517138599105815,
+        "token_f1": 0.7308875394817306,
+        "rouge_l": 0.7116953723170001,
+        "planning_token_f1": 0.5838375086632425,
+        "mc_accuracy": 0.8415730337078652
+      },
+      "delta": {
+        "coverage": 0.0,
+        "exact_match": 0.0005961251862891537,
+        "token_f1": 0.0008882029462260466,
+        "rouge_l": 0.0009390595128163648,
+        "planning_token_f1": -0.0004931828016805362,
+        "mc_accuracy": 0.003370786516853963
+      },
+      "pre_judge_gates": {
+        "coverage_100_percent": true,
+        "token_f1_not_below_b10": true,
+        "planning_token_f1_not_below_b10": false,
+        "mc_improved_over_b10": true
+      },
+      "eligible_for_judge": false
+    },
+    {
+      "step": 75,
+      "metrics": {
+        "coverage": 1.0,
+        "exact_match": 0.43576751117734724,
+        "token_f1": 0.7312312486593837,
+        "rouge_l": 0.7120341934536705,
+        "planning_token_f1": 0.5843700741622553,
+        "mc_accuracy": 0.8415730337078652
+      },
+      "delta": {
+        "coverage": 0.0,
+        "exact_match": 0.0011922503725782518,
+        "token_f1": 0.0012319121238791864,
+        "rouge_l": 0.0012778806494867512,
+        "planning_token_f1": 3.9382697332279726e-05,
+        "mc_accuracy": 0.003370786516853963
+      },
+      "pre_judge_gates": {
+        "coverage_100_percent": true,
+        "token_f1_not_below_b10": true,
+        "planning_token_f1_not_below_b10": true,
+        "mc_improved_over_b10": true
+      },
+      "eligible_for_judge": true
+    },
+    {
+      "step": 100,
+      "metrics": {
+        "coverage": 1.0,
+        "exact_match": 0.43546944858420267,
+        "token_f1": 0.7309688787288217,
+        "rouge_l": 0.7116969291153115,
+        "planning_token_f1": 0.5846498266949511,
+        "mc_accuracy": 0.8404494382022472
+      },
+      "delta": {
+        "coverage": 0.0,
+        "exact_match": 0.000894187779433675,
+        "token_f1": 0.00096954219331713,
+        "rouge_l": 0.0009406163111277399,
+        "planning_token_f1": 0.0003191352300281336,
+        "mc_accuracy": 0.0022471910112359383
+      },
+      "pre_judge_gates": {
+        "coverage_100_percent": true,
+        "token_f1_not_below_b10": true,
+        "planning_token_f1_not_below_b10": true,
+        "mc_improved_over_b10": true
+      },
+      "eligible_for_judge": true
+    }
+  ],
+  "selected_step": 75,
+  "selection_policy": "Require full coverage, overall Token-F1 >= B10, planning Token-F1 >= B10, and MC accuracy > B10; rank by Token-F1, planning Token-F1, MC."
+}

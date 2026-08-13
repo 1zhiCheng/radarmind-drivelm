@@ -1,0 +1,44 @@
+{
+  "schema_version": "drivelm-v037b-comparison-v1",
+  "baseline": {
+    "coverage": 1.0,
+    "exact_match": 0.434575260804769,
+    "token_f1": 0.7299993365355045,
+    "rouge_l": 0.7107563128041837,
+    "mc_accuracy": 0.8382022471910112,
+    "planning": 70.63479623824452,
+    "coordinate_f1": 0.13131312909511786,
+    "final": 0.5946356998326602,
+    "judge_complete": true
+  },
+  "candidate": {
+    "coverage": 1.0,
+    "exact_match": 0.43576751117734724,
+    "token_f1": 0.7312312486593837,
+    "rouge_l": 0.7120341934536705,
+    "mc_accuracy": 0.8415730337078652,
+    "planning": 70.85714285714286,
+    "coordinate_f1": 0.13383838146043772,
+    "final": 0.5963563281326234,
+    "judge_complete": true
+  },
+  "delta": {
+    "coverage": 0.0,
+    "exact_match": 0.0011922503725782518,
+    "token_f1": 0.0012319121238791864,
+    "rouge_l": 0.0012778806494867512,
+    "mc_accuracy": 0.003370786516853963,
+    "planning": 0.22234661889834229,
+    "coordinate_f1": 0.0025252523653198633,
+    "final": 0.0017206282999632228
+  },
+  "promotion_gates": {
+    "coverage_100_percent": true,
+    "judge_complete": true,
+    "final_strictly_improved": true,
+    "planning_regression_at_most_0_5_points": true,
+    "coordinate_f1_regression_at_most_0_5pp": true,
+    "mc_not_below_b10": true
+  },
+  "promoted": true
+}
