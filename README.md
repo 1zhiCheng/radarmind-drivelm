@@ -69,17 +69,29 @@ The active leaderboard path is camera-only and single-frame. Radar, LiDAR, map, 
 
 ## Results
 
-The reproduced v0.31 Qwen2.5-VL-3B checkpoint covers every item in the fixed local dev split:
+### v0.36 controlled B00/B10/B11 comparison
 
-| Split / task | QA | Exact Match | Token-F1 | ROUGE-L |
-| --- | ---: | ---: | ---: | ---: |
-| Overall | 3,355 | **44.26%** | **73.33%** | **71.59%** |
-| Perception | 890 | 45.51% | 82.56% | 78.56% |
-| Prediction | 599 | 75.13% | 90.41% | 89.05% |
-| Planning | 1,399 | 22.16% | 61.76% | 60.72% |
-| Behavior | 467 | 68.52% | 68.52% | 68.52% |
+All variants use the same 26,095 training QA, 3,355 scene-isolated dev QA, six-camera prompt, assistant-token-only CE objective, effective global batch size of 4, LoRA rank 8 and seed 42. B00 -> B10 changes only model capacity; B10 -> B11 changes only the visual budget.
 
-Multiple-choice accuracy is **81.46%** over 890 questions. These are local scene-isolated results—not the hidden challenge-server score. The newer B00 controlled run and the v0.35 router are documented in [the pure-CE experiment report](docs/current/VERSION_0_36_DRIVELM_CAMERA_ONLY_PURE_CE.md).
+| Variant | Base model | Visual budget / image | Train time | Coverage | Exact Match | Token-F1 | ROUGE-L | MC accuracy |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| B00 | Qwen2.5-VL-3B | 128 tokens | 3.03 h | 100% | 42.59% | 72.75% | 70.63% | 81.80% |
+| **B10** | **Qwen2.5-VL-7B** | **128 tokens** | **3.13 h** | **100%** | **43.46%** | **73.00%** | **71.08%** | **83.82%** |
+| B11 | Qwen2.5-VL-7B | 256 tokens | 5.50 h | 100% | 42.77% | 72.75% | 70.93% | 82.02% |
+
+DriveLM-DS follows the public DriveLM metric structure and graph gating, replacing the unavailable GPT judge with deterministic, cached DeepSeek-V4-Flash calls. Every required semantic item completed successfully; these are local proxy scores, not hidden challenge-server scores.
+
+| Variant | Graph eligible | Judge complete | Accuracy | Planning /100 | Language | Coordinate F1 | Graph /100 | Match /100 | Final |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| B00 | 1,844 | 752/752 | 77.12% | 68.48 | 0.4683 | **13.38%** | **44.77** | **29.08** | 0.58000 |
+| **B10** | **1,889** | **770/770** | **79.91%** | 70.63 | **0.4760** | 13.13% | 43.94 | 28.54 | **0.59464** |
+| B11 | 1,779 | 723/723 | 75.55% | **70.68** | 0.4539 | 12.12% | 44.17 | 28.14 | 0.58088 |
+
+B10 improves over B00 by **+0.86 percentage points EM**, **+2.02 points multiple-choice accuracy**, **+45 graph-eligible QA**, and **+0.01463 Final** (+2.52% relative). Doubling the B11 visual budget costs 75.5% more training time than B10 but lowers Final by 0.01376, so **B10 is the selected v0.36 checkpoint** and B11 is retained as a controlled negative result.
+
+### Earlier v0.31 reproduction baseline
+
+The first Qwen2.5-VL-3B reproduction obtained 44.26% Exact Match, 73.33% Token-F1, 71.59% ROUGE-L and 81.46% multiple-choice accuracy with 100% coverage. It predates the controlled v0.36 protocol and is reported separately rather than ranked against B00/B10/B11. See [the complete v0.36 report](docs/current/VERSION_0_36_DRIVELM_CAMERA_ONLY_PURE_CE.md) for configurations, paths and failure analysis.
 
 ## Quick start
 
