@@ -97,8 +97,8 @@ Active route: single-frame six-camera DriveLM-nuScenes, with B10 as the frozen p
 - [x] Complete B00/B10/B11 CE-LoRA training and evaluation.
 - [x] Select **B10 (Qwen2.5-VL-7B)** as the best baseline: Final **0.59464**.
 - [x] Implement and smoke-test three-RTX-5090 preference candidate generation.
-- [x] Save **12,139 / 26,095 candidates (46.5%)**; generation is currently paused and resumable.
-- [ ] Finish candidate generation and construct leakage-free chosen/rejected pairs.
+- [x] Save a resumable checkpoint at **12,139 / 26,095 candidates (46.5%)**.
+- [ ] Finish candidate generation and construct leakage-free chosen/rejected pairs; three-RTX-5090 batch-16 generation is running.
 - [ ] Precompute frozen-B10 reference log-probabilities.
 - [ ] Train B10-DPO on three RTX 5090 GPUs.
 - [ ] Evaluate B10-DPO on the unchanged 3,355-QA dev set and compare it with B10.
