@@ -75,3 +75,29 @@ python reproduction/qwen_vl_v037b/select_offline_candidate.py \
 Only a candidate with 100% coverage, Token-F1 and planning Token-F1 not below B10, and MC strictly above B10 is eligible for the semantic judge. `run_post_eval.sh` documents the recorded DeepSeek retry/cache flow and applies the final frozen promotion gates. Replace its machine-specific paths before reuse.
 
 Expected selected checkpoint for the recorded seed-42 run: step 75. See the [full report](../../docs/current/VERSION_0_37B_DRIVELM_CONSERVATIVE_DPO.md).
+
+## 5. Same-ID graph-gating audit
+
+The public protocol can give two models different eligible downstream QA sets. Build their exact intersection before accepting a small improvement:
+
+```bash
+python reproduction/qwen_vl_v037b/build_common_gating_subset.py \
+  --references-jsonl data/qwen_dev.jsonl \
+  --baseline-predictions outputs/b10_dev_predictions.json \
+  --candidate-predictions outputs/v037b_sweep/checkpoint-75-dev-predictions.json \
+  --output-dir outputs/v037b_common_gating
+```
+
+Run `evaluate_offline.py` and `drivelm_ds_eval/evaluate.py` for both generated prediction files against `common_references.jsonl`, then produce the paired gate report:
+
+```bash
+python reproduction/qwen_vl_v037b/summarize_common_gating.py \
+  --subset-report outputs/v037b_common_gating/common_subset_report.json \
+  --baseline-offline outputs/v037b_common_gating/baseline_offline.json \
+  --candidate-offline outputs/v037b_common_gating/candidate_offline.json \
+  --baseline-drivelm-ds outputs/v037b_common_gating/baseline_drivelm_ds.json \
+  --candidate-drivelm-ds outputs/v037b_common_gating/candidate_drivelm_ds.json \
+  --output-json outputs/v037b_common_gating/comparison.json
+```
+
+The recorded intersection contains 1,807 QA. Both semantic evaluations completed 732/732 cached judge items, and the paired Final still improves from 0.593546 to 0.594602.

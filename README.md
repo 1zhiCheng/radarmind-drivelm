@@ -119,7 +119,7 @@ v0.37B returned to the original B10 adapter, balanced the four DriveLM task fami
 | Coordinate F1 | 13.1313% | **13.3838%** | +0.2525pp |
 | DriveLM-DS Final | 0.594636 | **0.596356** | +0.001721 |
 
-The semantic judge completed **762/762** required items with zero failures. Final, planning, coordinate, MC, coverage and judge-completeness gates all passed, so **v0.37B step 75 is the current local-dev checkpoint**. The gain is deliberately reported as a controlled local result, not an official hidden-server score. See the [complete report](docs/current/VERSION_0_37B_DRIVELM_CONSERVATIVE_DPO.md), [reproduction guide](reproduction/qwen_vl_v037b/README.md) and [machine-readable results](results/v037b/).
+The semantic judge completed **762/762** required items with zero failures. Because graph gating yielded 1,889 eligible QA for B10 and 1,866 for v0.37B, a second fairness audit evaluated both models on the exact same 1,807 eligible IDs. On this paired subset, Final still improves from **0.593546 to 0.594602**; both judges complete 732/732 cached items, while planning changes by -0.192 points, within the frozen -0.5 tolerance. Final, planning, coordinate, MC, coverage and judge-completeness gates therefore all pass, so **v0.37B step 75 is the current local-dev checkpoint**. The gain is deliberately reported as a controlled local result, not an official hidden-server score. See the [complete report](docs/current/VERSION_0_37B_DRIVELM_CONSERVATIVE_DPO.md), [reproduction guide](reproduction/qwen_vl_v037b/README.md) and [machine-readable results](results/v037b/).
 
 ## Project status and TODO
 

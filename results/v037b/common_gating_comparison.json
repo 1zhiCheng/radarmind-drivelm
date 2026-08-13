@@ -1,0 +1,73 @@
+{
+  "schema_version": "drivelm-v037b-common-gating-comparison-v1",
+  "subset": {
+    "schema_version": "drivelm-v037b-common-gating-audit-v1",
+    "full_reference_count": 3355,
+    "baseline_eligible": 1889,
+    "candidate_eligible": 1866,
+    "common_eligible": 1807,
+    "baseline_only": 82,
+    "candidate_only": 59,
+    "common_by_tag": {
+      "0": 608,
+      "1": 600,
+      "2": 467,
+      "3": 132
+    },
+    "common_reference_count": 1807,
+    "baseline_common_predictions": 1807,
+    "candidate_common_predictions": 1807
+  },
+  "baseline": {
+    "exact_match": 0.3303818483674599,
+    "token_f1": 0.7048585280422012,
+    "rouge_l": 0.6746076493781361,
+    "mc_accuracy": 0.7642725598526704,
+    "accuracy": 0.787828947368421,
+    "planning": 70.925,
+    "language": 0.47604928555265474,
+    "coordinate_f1": 0.13131312909511786,
+    "graph": 43.93939393939394,
+    "match": 28.53535342445286,
+    "final": 0.5935463534331209
+  },
+  "candidate": {
+    "exact_match": 0.33259546209186497,
+    "token_f1": 0.7072073809474773,
+    "rouge_l": 0.6771183565994291,
+    "mc_accuracy": 0.7697974217311234,
+    "accuracy": 0.7927631578947368,
+    "planning": 70.73333333333333,
+    "language": 0.4772599928661554,
+    "coordinate_f1": 0.13383838146043772,
+    "graph": 44.28030303030303,
+    "match": 28.8320705881734,
+    "final": 0.5946021046618586
+  },
+  "delta": {
+    "exact_match": 0.0022136137244050946,
+    "token_f1": 0.0023488529052760887,
+    "rouge_l": 0.002510707221292985,
+    "mc_accuracy": 0.0055248618784530246,
+    "accuracy": 0.004934210526315819,
+    "planning": -0.19166666666666288,
+    "language": 0.0012107073135006474,
+    "coordinate_f1": 0.0025252523653198633,
+    "graph": 0.3409090909090935,
+    "match": 0.29671716372054036,
+    "final": 0.0010557512287376891
+  },
+  "judge_completed": {
+    "baseline": 732,
+    "candidate": 732
+  },
+  "paired_gates": {
+    "same_reference_and_prediction_count": true,
+    "both_judges_complete": true,
+    "final_strictly_improved": true,
+    "planning_regression_at_most_0_5_points": true,
+    "coordinate_f1_regression_at_most_0_5pp": true,
+    "mc_not_below_b10": true
+  },
+  "paired_audit_passed": true
+}

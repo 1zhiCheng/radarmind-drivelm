@@ -78,7 +78,25 @@ DriveLM-DS 保留公开 DriveLM 指标结构和 graph gating，仅把不可用�
 
 冻结门槛全部通过：Final 严格提升、planning 回退不超过 0.5、coordinate F1 回退不超过 0.5pp、MC 不低于 B10、coverage 和 judge complete 均为 100%。因此 v0.37B-75 成为当前本地最优 checkpoint。
 
-## 7. 如何复现
+## 7. Graph-gating 共同子集公平性审计
+
+公开式 graph gating 会根据每帧第一个 important-object 回答的坐标匹配，决定后续 QA 是否进入计分。B10 有 1,889 条 eligible QA，v0.37B 有 1,866 条，直接 Final 因此并非完全相同的题目均值。为排除“少回答困难题导致均值变高”，额外取两者 eligible ID 的严格交集：1,807 条，其中 tag 0/1/2/3 分别为 608/600/467/132。两套模型都只在这些相同 ID 上重新评估；语义 Judge 各完成 732/732，且全部命中已有缓存。
+
+| 共同子集指标 | B10 | v0.37B-75 | 差值 |
+| --- | ---: | ---: | ---: |
+| Exact Match | 33.0382% | 33.2595% | +0.2214pp |
+| Token-F1 | 70.4859% | 70.7207% | +0.2349pp |
+| ROUGE-L | 67.4608% | 67.7118% | +0.2511pp |
+| MC accuracy | 76.4273% | 76.9797% | +0.5525pp |
+| Planning /100 | 70.9250 | 70.7333 | -0.1917 |
+| Coordinate F1 | 13.1313% | 13.3838% | +0.2525pp |
+| Graph /100 | 43.9394 | 44.2803 | +0.3409 |
+| Match /100 | 28.5354 | 28.8321 | +0.2967 |
+| DriveLM-DS Final | 0.593546 | **0.594602** | **+0.001056** |
+
+共同子集上 Final 仍严格提升，planning 的 -0.192 也在冻结的 -0.5 容忍范围内，所有配对门槛通过。因此 v0.37B 的晋级不是 graph gating 子集差异造成的假提升。后续版本把“全协议结果 + 同 ID 共同子集结果”同时作为强制报告项。
+
+## 8. 如何复现
 
 完整命令见 [`reproduction/qwen_vl_v037b/README.md`](../../reproduction/qwen_vl_v037b/README.md)。关键顺序是：
 
@@ -87,7 +105,8 @@ DriveLM-DS 保留公开 DriveLM 指标结构和 graph gating，仅把不可用�
 3. 用三张同型号 RTX 5090 训练 100 步；
 4. 对 25/50/75/100 全部运行 3,355-QA dev；
 5. 用冻结的离线门槛选一个 checkpoint；
-6. 仅对入选候选运行完整 DriveLM-DS。
+6. 仅对入选候选运行完整 DriveLM-DS；
+7. 构建 B10/候选 graph-eligible ID 交集，并在同一子集重复离线与 DriveLM-DS 评测。
 
 模型权重不提交 Git。服务器上的晋级 adapter 位于：
 
@@ -95,7 +114,7 @@ DriveLM-DS 保留公开 DriveLM 指标结构和 graph gating，仅把不可用�
 /mnt/data/zzy/drivelm/models/qwen2.5-vl-7b-drivelm-v037b-anchored-dpo-seed42/checkpoint-75
 ```
 
-## 8. 结论与下一阶段
+## 9. 结论与下一阶段
 
 v0.37B 证明单 LoRA 在合适的数据配比和锚定目标下可以同时改善 lexical、MC、planning、graph 与 coordinate 指标，因此当前**没有证据支持引入 MoL**。本次提升幅度较小，应该表述为本地 dev 上的受控增益，而不是官方榜单结论。
 
