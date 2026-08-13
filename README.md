@@ -91,46 +91,18 @@ B10 improves over B00 by **+0.86 percentage points EM**, **+2.02 points multiple
 
 ## Project status and TODO
 
-Last updated: **2026-08-13**. The active route is single-frame, six-camera DriveLM-nuScenes. B10 is frozen as the sole post-training baseline; deprecated temporal, radar and multi-LoRA experiments are not part of this execution plan.
+Active route: single-frame six-camera DriveLM-nuScenes, with B10 as the frozen post-training baseline.
 
-### Completed
-
-- [x] Download and validate DriveLM-nuScenes v1.1 QA annotations and all six synchronized camera views.
-- [x] Build a deterministic **26,095-QA train / 3,355-QA scene-isolated dev** split with zero train/dev scene overlap.
-- [x] Implement assistant-token-only CE LoRA SFT, multi-GPU training, resumable inference and 100% coverage auditing.
-- [x] Train the controlled B00, B10 and B11 variants under the same data split and seed.
-- [x] Evaluate all three variants with lexical metrics, multiple-choice accuracy and the DriveLM-DS local proxy.
-- [x] Complete every required DeepSeek-V4-Flash dev judge call for B00, B10 and B11 with zero judge failures.
-- [x] Select and freeze **B10: Qwen2.5-VL-7B, 128 visual tokens per image** as the v0.36 winner with Final **0.59464**.
-- [x] Produce two continuous reasoning videos and an illustrated reproduction report.
-- [x] Implement v0.37A train-only B10 candidate generation with deterministic three-way sharding, GPU UUID binding and resume support.
-- [x] Implement deterministic high-confidence preference filtering with explicit train/dev ID and scene leakage checks.
-- [x] Pass a three-RTX-5090 smoke test: six-camera input, sampled generation, non-overlapping shards and zero dev leakage.
-- [x] Generate and persist **12,139 / 26,095 train candidates (46.5%)** before the requested pause: shard counts **3,972 / 4,107 / 4,060**.
-- [x] Stop all three generation workers cleanly and release physical GPUs 0, 2 and 3 without deleting partial JSONL files.
-
-### Next: v0.37A offline preference optimization
-
-- [ ] Resume all three candidate shards from the saved 46.5% checkpoint; do not regenerate completed IDs.
-- [ ] Reach 26,095/26,095 candidate coverage, merge the three shards, reject duplicate or unexpected IDs and write a SHA-256 audit report.
-- [ ] Construct train-only chosen/rejected pairs from the frozen reference answers and B10 candidates.
-- [ ] Keep ambiguous free-form pairs out of training; request separate authorization before sending any train text to an external semantic judge.
-- [ ] Report preference-pair coverage by task, tag and rejection reason, with confirmed zero dev IDs and zero train/dev scene overlap.
-- [ ] Precompute frozen-B10 chosen/rejected reference log-probabilities on three RTX 5090 GPUs and require 100% pair coverage.
-- [ ] Run a short end-to-end DPO smoke test and verify finite loss, gradients, checkpoint saving and restart behavior.
-- [ ] Train **B10-DPO** on physical GPUs 0, 2 and 3 with the A6000 excluded from the training world size.
-- [ ] Run complete inference on the unchanged 3,355-QA dev split and require 100% prediction coverage.
-- [ ] Evaluate B10-DPO with the same EM, Token-F1, ROUGE-L, MC accuracy and DriveLM-DS protocol used for B10.
-- [ ] Publish paired B10 vs B10-DPO results, including overall metrics and perception, prediction, planning, behavior and grounding slices.
-
-### Promotion gates and later stages
-
-- [ ] Promote B10-DPO only if DriveLM-DS Final improves without a material planning, MC-accuracy or coverage regression.
-- [ ] If the first DPO run passes, repeat the winning configuration with additional seeds and report mean, spread and paired confidence intervals.
-- [ ] Build a conservative GRPO reward from deterministic task metrics plus the frozen semantic judge only after the offline preference stage is stable.
-- [ ] Run GRPO as a separate adapter initialized from the promoted checkpoint; preserve B10 and B10-DPO for controlled comparison.
-- [ ] Export the best checkpoint to the official DriveLM validation submission schema and document the hidden-server submission procedure.
-- [ ] Update this checklist, the experiment report and the result tables after every completed stage; never mark an item complete from a partial or smoke-only run.
+- [x] Prepare the **26,095 train / 3,355 scene-isolated dev** dataset.
+- [x] Complete B00/B10/B11 CE-LoRA training and evaluation.
+- [x] Select **B10 (Qwen2.5-VL-7B)** as the best baseline: Final **0.59464**.
+- [x] Implement and smoke-test three-RTX-5090 preference candidate generation.
+- [x] Save **12,139 / 26,095 candidates (46.5%)**; generation is currently paused and resumable.
+- [ ] Finish candidate generation and construct leakage-free chosen/rejected pairs.
+- [ ] Precompute frozen-B10 reference log-probabilities.
+- [ ] Train B10-DPO on three RTX 5090 GPUs.
+- [ ] Evaluate B10-DPO on the unchanged 3,355-QA dev set and compare it with B10.
+- [ ] If DPO passes the promotion gate, continue with multi-seed verification and GRPO.
 
 ### Earlier v0.31 reproduction baseline
 
