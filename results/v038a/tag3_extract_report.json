@@ -1,0 +1,13 @@
+{
+  "schema_version": "drivelm-v038-tag3-extract-v1",
+  "source": "/mnt/data/zzy/drivelm/reproduction/qwen_vl_stage2_ablation_v1/qwen_v033_c00_train.jsonl",
+  "source_sha256": "1775196f4c583d7de86fc256f7392173649e088ff18782a6b2cdf8d9036bc150",
+  "records": 1206,
+  "scenes": 389,
+  "by_qa_index": {
+    "1": 171,
+    "2": 1035
+  },
+  "filter": "tag contains 3",
+  "output_sha256": "53081524a2f9889a12a50b3eff2f4fb4bc9f6071b78ef679df9e95cf43a169f5"
+}

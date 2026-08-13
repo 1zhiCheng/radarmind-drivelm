@@ -1,0 +1,9 @@
+{
+  "schema_version": "drivelm-v038-important-object-extract-v1",
+  "source": "/mnt/data/zzy/drivelm/reproduction/qwen_vl_stage2_ablation_v1/qwen_v033_c00_train.jsonl",
+  "source_sha256": "1775196f4c583d7de86fc256f7392173649e088ff18782a6b2cdf8d9036bc150",
+  "records": 3605,
+  "scenes": 619,
+  "filter": "qa_index == 0 and tag contains 2",
+  "output_sha256": "a82a81d9eee50c576a9598e9d54bde3099572160a87e7a7ffafd36affaf3c18d"
+}

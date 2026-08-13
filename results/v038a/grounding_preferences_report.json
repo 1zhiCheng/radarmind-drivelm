@@ -1,0 +1,94 @@
+{
+  "schema_version": "drivelm-v038-grounding-balanced-v1",
+  "train_records": 26095,
+  "dev_records": 3355,
+  "train_dev_scene_overlap": 0,
+  "fresh_candidate_records": 4811,
+  "valid_complete_hard_candidates": 9002,
+  "fresh_pairs_by_task": {
+    "behavior": 0,
+    "perception": 3504,
+    "planning": 0,
+    "prediction": 1205
+  },
+  "candidate_exclusion": {
+    "incomplete_structure": 2,
+    "length_ratio": 611,
+    "not_hard_enough": 7
+  },
+  "per_task": 1026,
+  "output_records": 4104,
+  "unique_output_ids": 4104,
+  "dev_ids_in_output": 0,
+  "source_counts": {
+    "perception": {
+      "fresh_grounding": 1026,
+      "v037b_replay": 0
+    },
+    "prediction": {
+      "fresh_grounding": 1026,
+      "v037b_replay": 0
+    },
+    "planning": {
+      "fresh_grounding": 0,
+      "v037b_replay": 1026
+    },
+    "behavior": {
+      "fresh_grounding": 0,
+      "v037b_replay": 1026
+    }
+  },
+  "selected_fresh_stats": {
+    "perception": {
+      "count": 1026,
+      "coordinate_f1_histogram": {
+        "0.0": 1026
+      },
+      "downstream_eligible_loss_histogram": {
+        "4": 1026
+      },
+      "mean_coordinate_f1": 0.0,
+      "mean_length_ratio": 0.980246709506627
+    },
+    "prediction": {
+      "count": 1026,
+      "coordinate_f1_histogram": {
+        "0.0": 976,
+        "0.3": 50
+      },
+      "downstream_eligible_loss_histogram": {
+        "0": 1026
+      },
+      "mean_coordinate_f1": 0.016244314192116093,
+      "mean_length_ratio": 0.9729209660011874
+    },
+    "planning": {
+      "count": 0,
+      "coordinate_f1_histogram": {},
+      "downstream_eligible_loss_histogram": {},
+      "mean_coordinate_f1": null,
+      "mean_length_ratio": null
+    },
+    "behavior": {
+      "count": 0,
+      "coordinate_f1_histogram": {},
+      "downstream_eligible_loss_histogram": {},
+      "mean_coordinate_f1": null,
+      "mean_length_ratio": null
+    }
+  },
+  "round_robin_order": [
+    "perception",
+    "prediction",
+    "planning",
+    "behavior"
+  ],
+  "reference_logp_present": false,
+  "external_api_used": false,
+  "input_sha256": {
+    "train": "1775196f4c583d7de86fc256f7392173649e088ff18782a6b2cdf8d9036bc150",
+    "dev": "d9a5e40efa51877ea9bac42a213b47f3e3b6ad0ce66e3d6d77bdf1a592d9db01",
+    "replay": "1e61515d6e8d6852fb4b5bd13af319aaedd4c8c0f2bac767bcb38a2aa9cb8ae8"
+  },
+  "output_sha256": "b49fc9a750962ab92d42829ddd793920c55632f173bda513b7618bef22e6cd24"
+}

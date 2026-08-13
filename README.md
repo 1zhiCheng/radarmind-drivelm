@@ -135,7 +135,9 @@ Active route: single-frame six-camera DriveLM-nuScenes, with v0.37B step 75 as t
 - [x] Complete 3,355-QA dev and DeepSeek evaluation; DPO did not pass the promotion gate.
 - [x] Run v0.37B task-balanced, CE-anchored conservative DPO and sweep four checkpoints.
 - [x] Promote **v0.37B step 75** after all frozen gates pass: Final **0.59636**.
-- [ ] Build v0.38 train-only graph/coordinate hard examples and run a controlled grounding ablation.
+- [x] Audit legacy graph/coordinate candidates and identify the 128-token truncation confound.
+- [x] Build the leakage-free v0.38A 4,104-pair grounding/replay manifest from complete 256-token candidates.
+- [ ] Complete frozen v0.37B reference scoring, conservative v0.38A training and full checkpoint evaluation.
 - [ ] Consider short GRPO only after v0.38 passes the same full-dev gates; MoL remains out of scope without evidence of expert-worthy task conflict.
 
 ### Earlier v0.31 reproduction baseline
@@ -276,6 +278,7 @@ reproduction/qwen_vl/        dataset, single-GPU SFT, inference and lexical eval
 reproduction/qwen_vl_v036/   controlled pure-CE multi-GPU trainer
 reproduction/qwen_vl_v037a/  candidate generation, preference audit and DPO
 reproduction/qwen_vl_v037b/  balanced, CE-anchored conservative DPO and selection
+reproduction/qwen_vl_v038/   graph-anchor/coordinate data audit and controlled post-training
 reproduction/drivelm_ds_eval local structural/semantic proxy evaluator
 docs/current/                 current experiment contracts and results
 docs/demos/                   continuous-video reproduction notes
