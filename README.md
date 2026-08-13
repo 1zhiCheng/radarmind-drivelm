@@ -89,6 +89,20 @@ DriveLM-DS follows the public DriveLM metric structure and graph gating, replaci
 
 B10 improves over B00 by **+0.86 percentage points EM**, **+2.02 points multiple-choice accuracy**, **+45 graph-eligible QA**, and **+0.01463 Final** (+2.52% relative). Doubling the B11 visual budget costs 75.5% more training time than B10 but lowers Final by 0.01376, so **B10 is the selected v0.36 checkpoint** and B11 is retained as a controlled negative result.
 
+### v0.37A offline DPO
+
+The complete train-only preference pipeline produced 7,149 leakage-free pairs from 26,095 B10 candidate records. Three-GPU DPO completed 596 steps, followed by a full checkpoint sweep.
+
+| Variant | Exact Match | Token-F1 | ROUGE-L | MC accuracy | Planning /100 | Final |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| **B10** | 43.46% | 73.00% | 71.08% | 83.82% | **70.63** | **0.59464** |
+| DPO step 100 | **43.55%** | **73.17%** | **71.22%** | 84.27% | 69.75 | 0.59430 |
+| DPO step 200 | 43.67% | 73.13% | 71.14% | 84.27% | 69.72 | 0.59196 |
+| DPO step 300 | 43.49% | 73.12% | 71.02% | 83.93% | 66.42 | 0.57561 |
+| DPO step 596 | 42.98% | 71.76% | 69.40% | **84.83%** | 66.52 | 0.55330 |
+
+DPO improved multiple-choice accuracy but did not pass the Final and planning promotion gates. B10 remains the active checkpoint. See the [full v0.37A report](docs/current/VERSION_0_37A_DRIVELM_B10_DPO.md); the next controlled experiment is [v0.37B conservative DPO](docs/current/VERSION_0_37B_DRIVELM_CONSERVATIVE_DPO_PLAN.md).
+
 ## Project status and TODO
 
 Active route: single-frame six-camera DriveLM-nuScenes, with B10 as the frozen post-training baseline.
@@ -97,12 +111,12 @@ Active route: single-frame six-camera DriveLM-nuScenes, with B10 as the frozen p
 - [x] Complete B00/B10/B11 CE-LoRA training and evaluation.
 - [x] Select **B10 (Qwen2.5-VL-7B)** as the best baseline: Final **0.59464**.
 - [x] Implement and smoke-test three-RTX-5090 preference candidate generation.
-- [x] Save a resumable checkpoint at **12,139 / 26,095 candidates (46.5%)**.
-- [ ] Finish candidate generation and construct leakage-free chosen/rejected pairs; three-RTX-5090 batch-16 generation is running.
-- [ ] Precompute frozen-B10 reference log-probabilities.
-- [ ] Train B10-DPO on three RTX 5090 GPUs.
-- [ ] Evaluate B10-DPO on the unchanged 3,355-QA dev set and compare it with B10.
-- [ ] If DPO passes the promotion gate, continue with multi-seed verification and GRPO.
+- [x] Generate **26,095/26,095** candidates and construct 7,149 leakage-free preference pairs.
+- [x] Precompute frozen-B10 reference log-probabilities with 100% pair coverage.
+- [x] Train B10-DPO on three RTX 5090 GPUs and evaluate five intermediate checkpoints.
+- [x] Complete 3,355-QA dev and DeepSeek evaluation; DPO did not pass the promotion gate.
+- [ ] Run v0.37B task-balanced, CE-anchored conservative DPO from the original B10.
+- [ ] Consider MoL only if the controlled single-LoRA experiment confirms reproducible task conflict.
 
 ### Earlier v0.31 reproduction baseline
 
@@ -240,6 +254,7 @@ DriveLM-DS preserves the public metric structure but substitutes a frozen DeepSe
 challenge/                    official DriveLM extraction and evaluation tools
 reproduction/qwen_vl/        dataset, single-GPU SFT, inference and lexical eval
 reproduction/qwen_vl_v036/   controlled pure-CE multi-GPU trainer
+reproduction/qwen_vl_v037a/  candidate generation, preference audit and DPO
 reproduction/drivelm_ds_eval local structural/semantic proxy evaluator
 docs/current/                 current experiment contracts and results
 docs/demos/                   continuous-video reproduction notes
