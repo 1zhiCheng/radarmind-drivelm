@@ -1,0 +1,35 @@
+{
+  "schema_version": "drivelm-v038b-anchor-route-summary-v1",
+  "status": "completed_not_promoted",
+  "scope": "local scene-isolated 3355-QA dev; not official hidden-server score",
+  "routing": {
+    "anchor": "v0.38A checkpoint-50",
+    "downstream": "v0.37B checkpoint-75",
+    "anchor_count": 467,
+    "downstream_count": 2888,
+    "changed_anchor_answers": 436
+  },
+  "metrics": {
+    "coverage": 1.0,
+    "eligible_count": 1901,
+    "anchor_coordinate_f1": 0.14833204817846113,
+    "multiple_choice_accuracy": 0.8415730337078652,
+    "planning_deepseek_100": 69.74497681607419,
+    "drivelm_ds_final": 0.5921541435920026,
+    "judge_required": 779,
+    "judge_completed": 779,
+    "judge_failures": 0,
+    "judge_cache_hits": 779
+  },
+  "cohort_diagnostic": {
+    "common_eligible": 1830,
+    "newly_eligible": 71,
+    "lost_eligible": 36,
+    "newly_eligible_planning_count": 35,
+    "newly_eligible_planning_mean": 52.0,
+    "common_planning_mean": 70.75980392156863,
+    "lost_planning_count": 18,
+    "lost_planning_mean": 74.16666666666667
+  },
+  "conclusion": "Anchor-only routing preserves v0.38A coverage but does not recover Final; proceed to OOF graph-memory CE control experiment."
+}

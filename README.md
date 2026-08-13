@@ -121,6 +121,12 @@ v0.37B returned to the original B10 adapter, balanced the four DriveLM task fami
 
 The semantic judge completed **762/762** required items with zero failures. Because graph gating yielded 1,889 eligible QA for B10 and 1,866 for v0.37B, a second fairness audit evaluated both models on the exact same 1,807 eligible IDs. On this paired subset, Final still improves from **0.593546 to 0.594602**; both judges complete 732/732 cached items, while planning changes by -0.192 points, within the frozen -0.5 tolerance. Final, planning, coordinate, MC, coverage and judge-completeness gates therefore all pass, so **v0.37B step 75 is the current local-dev checkpoint**. The gain is deliberately reported as a controlled local result, not an official hidden-server score. See the [complete report](docs/current/VERSION_0_37B_DRIVELM_CONSERVATIVE_DPO.md), [reproduction guide](reproduction/qwen_vl_v037b/README.md) and [machine-readable results](results/v037b/).
 
+### v0.38 grounding result and v0.38B direction
+
+v0.38A increased eligible QA from **1,866 to 1,901** and anchor coordinate F1 from **14.07% to 14.83%**, but Planning fell from **70.86 to 69.73** and Final from **0.59636 to 0.59209**, so it was not promoted. A zero-training anchor-routing diagnostic retained the 1,901 eligible QA but obtained only **0.59215 Final**. The 35 newly eligible Planning QA average **52.0**, versus **70.76** on the common cohort, showing that downstream graph consumption—not anchor routing alone—is the next bottleneck.
+
+v0.38B therefore uses strict scene-level out-of-fold graph memory and matched `G00`/`G10` pure-CE controls before any further preference optimization. See the [v0.38A result](docs/current/VERSION_0_38A_DRIVELM_GROUNDING_PREFERENCE.md), [v0.38B experiment contract](docs/current/VERSION_0_38B_DRIVELM_OOF_GRAPH_MEMORY.md), and compact [v0.38A](results/v038a/final_summary.json) / [v0.38B-0](results/v038b/anchor_route_summary.json) results.
+
 ## Project status and TODO
 
 Active route: single-frame six-camera DriveLM-nuScenes, with v0.37B step 75 as the current local-dev checkpoint and B10 retained as the frozen control.
@@ -137,8 +143,10 @@ Active route: single-frame six-camera DriveLM-nuScenes, with v0.37B step 75 as t
 - [x] Promote **v0.37B step 75** after all frozen gates pass: Final **0.59636**.
 - [x] Audit legacy graph/coordinate candidates and identify the 128-token truncation confound.
 - [x] Build the leakage-free v0.38A 4,104-pair grounding/replay manifest from complete 256-token candidates.
-- [ ] Complete frozen v0.37B reference scoring, conservative v0.38A training and full checkpoint evaluation.
-- [ ] Consider short GRPO only after v0.38 passes the same full-dev gates; MoL remains out of scope without evidence of expert-worthy task conflict.
+- [x] Complete v0.38A three-GPU DPO and four-checkpoint evaluation; grounding improved, but Final **0.59209** failed promotion.
+- [x] Run the v0.38B-0 anchor-routing diagnosis; newly eligible Planning QA average only **52.0**, so routing alone is insufficient.
+- [ ] Run the frozen oracle-memory feasibility check, then build strict scene-level OOF graph memory and matched G00/G10 pure-CE controls.
+- [ ] Consider preference optimization only after graph-memory SFT passes the same full-dev gates; MoL and online RL remain out of scope without supporting evidence.
 
 ### Earlier v0.31 reproduction baseline
 

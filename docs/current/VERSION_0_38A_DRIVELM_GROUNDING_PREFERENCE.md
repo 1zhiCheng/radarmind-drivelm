@@ -1,6 +1,6 @@
 # RadarMind-DriveLM v0.38A：Graph Anchor 与坐标 Grounding 偏好优化
 
-状态：实验契约冻结；train-only 候选生成中，尚未训练、尚无结果。
+状态：已完成；checkpoint-50 通过离线筛选，但未通过最终晋级门槛，v0.37B-75 继续作为主模型。
 
 ## 1. 起点与目标
 
@@ -101,3 +101,22 @@ L = DPO(beta=0.05) + 0.1 * CE_chosen
 - 本版先修复 anchor/coordinate 监督质量，随后才做 v0.38B OOF graph memory，避免把错误第一问作为 agent memory 传播；
 - 本版不做 GRPO/PPO/GSPO/SAPO；reward 与完整 DriveLM-DS 的相关性尚未校准；
 - OPD 若需发送 train 文本或图像给外部 teacher，需要单独获得用户的数据发送授权。
+
+## 8. 实际训练与评测结果
+
+三张 RTX 5090 完成 100 steps，耗时 778.7 秒；训练集为 4,104 个 train-only 偏好对，reference log-prob coverage 为 100%。step 25/50/75/100 均完成 3,355 条 dev 推理。冻结的无 Judge 选择器只允许 step 50 进入 DeepSeek 评测。
+
+| 指标 | v0.37B-75 | v0.38A-50 | 差值 |
+| --- | ---: | ---: | ---: |
+| Coverage | 100% | 100% | 0 |
+| Exact Match | 43.5768% | 43.6066% | +0.0298 pp |
+| Token-F1 | 73.1231% | 73.1039% | -0.0192 pp |
+| MC accuracy | 84.1573% | 84.1573% | 0 |
+| Eligible QA | 1,866 | 1,901 | +35 |
+| Anchor coordinate F1 | 14.0676% | 14.8332% | +0.7656 pp |
+| Planning /100 | 70.8571 | 69.7295 | -1.1276 |
+| DriveLM-DS Final | 0.596356 | 0.592092 | -0.004264 |
+
+在两模型共同 eligible 的 1,830 条 QA 上，Planning 完全不变，Final 仅因 Language 下降而从 0.594798 降至 0.594246。v0.38A 新放行 71 条、丢失 36 条；其中新增 35 条 Planning QA 的推导平均 Judge 分只有 52.0，而共同子集为 70.76，被替换掉的 18 条为 74.17。因此 full-protocol Planning 下跌主要是 graph gating 恢复了更难的下游题，而不是共同题上的规划能力被普遍破坏。
+
+所有 judge 项完成且无失败，但 Final、Planning guardrail 和 same-ID Final 三项未通过。v0.38A 不晋级，也不继续追加 DPO；其 checkpoint-50 只保留为 grounding/anchor 实验组件。

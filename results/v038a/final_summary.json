@@ -1,0 +1,34 @@
+{
+  "schema_version": "drivelm-v038a-final-summary-v1",
+  "status": "completed_not_promoted",
+  "baseline": {
+    "name": "v0.37B checkpoint-75",
+    "eligible_count": 1866,
+    "anchor_coordinate_f1": 0.14067626127890914,
+    "planning_deepseek_100": 70.85714285714286,
+    "drivelm_ds_final": 0.5963563281326234
+  },
+  "candidate": {
+    "name": "v0.38A checkpoint-50",
+    "coverage": 1.0,
+    "eligible_count": 1901,
+    "anchor_coordinate_f1": 0.14833204817846113,
+    "planning_deepseek_100": 69.72952086553323,
+    "drivelm_ds_final": 0.5920923198012025,
+    "judge_required": 779,
+    "judge_completed": 779,
+    "judge_failures": 0
+  },
+  "delta": {
+    "eligible_count": 35,
+    "anchor_coordinate_f1": 0.007655786899551986,
+    "planning_deepseek_100": -1.1276219916096295,
+    "drivelm_ds_final": -0.004264008331420932
+  },
+  "same_id": {
+    "common_eligible": 1830,
+    "planning_delta": 0.0,
+    "final_delta": -0.0005525904334090503,
+    "passed": false
+  }
+}
