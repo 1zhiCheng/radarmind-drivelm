@@ -145,7 +145,8 @@ Active route: single-frame six-camera DriveLM-nuScenes, with v0.37B step 75 as t
 - [x] Build the leakage-free v0.38A 4,104-pair grounding/replay manifest from complete 256-token candidates.
 - [x] Complete v0.38A three-GPU DPO and four-checkpoint evaluation; grounding improved, but Final **0.59209** failed promotion.
 - [x] Run the v0.38B-0 anchor-routing diagnosis; newly eligible Planning QA average only **52.0**, so routing alone is insufficient.
-- [ ] Run the frozen oracle-memory feasibility check, then build strict scene-level OOF graph memory and matched G00/G10 pure-CE controls.
+- [x] Run the 35-QA oracle-memory probe: Planning **52.00 -> 54.86**, but only 2 answers changed.
+- [ ] Run a train-only G00/G10 memory-consumption pilot; start strict scene-level OOF graph memory only if the pilot passes.
 - [ ] Consider preference optimization only after graph-memory SFT passes the same full-dev gates; MoL and online RL remain out of scope without supporting evidence.
 
 ### Earlier v0.31 reproduction baseline

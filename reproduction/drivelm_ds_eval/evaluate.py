@@ -40,6 +40,10 @@ def parse_args() -> argparse.Namespace:
         "--judge-limit", type=int, default=0,
         help="Only judge N semantic items for an API smoke test; suppresses final score.",
     )
+    parser.add_argument(
+        "--disable-graph-gating", action="store_true",
+        help="Evaluate a preselected fixed-ID subset without applying graph gating again.",
+    )
     return parser.parse_args()
 
 
@@ -56,6 +60,9 @@ def message(record: dict[str, Any], role: str) -> str:
 
 
 def language_metrics(candidates: list[str], references: list[str]) -> dict[str, float]:
+    expected = ("Bleu_1", "Bleu_2", "Bleu_3", "Bleu_4", "ROUGE_L", "CIDEr")
+    if not candidates:
+        return {key: 0.0 for key in expected}
     try:
         import language_evaluation
     except ImportError as error:
@@ -64,7 +71,6 @@ def language_metrics(candidates: list[str], references: list[str]) -> dict[str, 
         ) from error
     evaluator = language_evaluation.CocoEvaluator(coco_types=["BLEU", "ROUGE_L", "CIDEr"])
     raw = evaluator.run_evaluation(candidates, references)
-    expected = ("Bleu_1", "Bleu_2", "Bleu_3", "Bleu_4", "ROUGE_L", "CIDEr")
     return {key: float(raw[key]) for key in expected}
 
 
@@ -118,7 +124,7 @@ def main() -> None:
             if record["id"] not in predictions:
                 continue
             question = message(record, "user")
-            if index > 0 and not graph_question_is_eligible(question, matched_graph):
+            if not args.disable_graph_gating and index > 0 and not graph_question_is_eligible(question, matched_graph):
                 gated_out.append(record["id"])
                 continue
             eligible.append(record)
@@ -191,6 +197,7 @@ def main() -> None:
             match_100=match_score,
         )
         if complete_judging and not args.judge_limit and not missing_ids
+        and all(by_tag.get(tag, 0) > 0 for tag in (0, 1, 2, 3))
         else None
     )
 
@@ -202,7 +209,7 @@ def main() -> None:
             "judge_prompt_version": PROMPT_VERSION,
             "thinking": "disabled",
             "temperature": 0,
-            "graph_gating": "public challenge/evaluation.py compatible",
+            "graph_gating": "disabled for fixed-ID subset" if args.disable_graph_gating else "public challenge/evaluation.py compatible",
         },
         "inputs": {
             "references": str(args.references_jsonl.resolve()),

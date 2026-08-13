@@ -1,0 +1,40 @@
+{
+  "schema_version": "drivelm-v038b-oracle-memory-probe-summary-v1",
+  "status": "dev_only_not_for_training_or_promotion",
+  "selection": {
+    "definition": "planning QA newly eligible under v0.38A checkpoint-50 versus v0.37B checkpoint-75",
+    "count": 35,
+    "memory_source": "reference frame anchor tuples",
+    "memory_tuple_min": 3,
+    "memory_tuple_max": 6
+  },
+  "api_payload": {
+    "oracle_memory_sent": false,
+    "content": "original question, reference answer, candidate answer only"
+  },
+  "baseline": {
+    "exact_match": 0.08571428571428572,
+    "token_f1": 0.40507419400222405,
+    "rouge_l": 0.39276314011026964,
+    "planning_deepseek_100": 52.0
+  },
+  "oracle_context": {
+    "changed_answers": 2,
+    "exact_match": 0.08571428571428572,
+    "token_f1": 0.40507419400222405,
+    "rouge_l": 0.39276314011026964,
+    "planning_deepseek_100": 54.857142857142854,
+    "judge_required": 35,
+    "judge_completed": 35,
+    "judge_failures": 0,
+    "judge_cache_hits": 35,
+    "partial_protocol_final": null
+  },
+  "delta": {
+    "exact_match": 0.0,
+    "token_f1": 0.0,
+    "rouge_l": 0.0,
+    "planning_deepseek_100": 2.857142857142854
+  },
+  "decision": "Run a small train-only G00/G10 CE memory-consumption pilot before full OOF cross-fitting."
+}

@@ -1,6 +1,6 @@
 # RadarMind-DriveLM v0.38B：OOF Graph Memory 与链式一致性 SFT
 
-状态：工程准备阶段；v0.38B-0 路由诊断已完成，正式训练尚未启动。
+状态：oracle-memory feasibility probe 已完成；进入 train-only memory-consumption pilot，正式 OOF 训练尚未启动。
 
 ## 1. 设计依据
 
@@ -84,3 +84,19 @@ L = CE_target(answer | six_cameras, question, graph_memory)
 - 新放行 Planning QA 平均 Judge 分不低于 65，且明显高于当前 52.0。
 
 先做冻结的 oracle-memory 小样本上界诊断。若 oracle 也无增益，则停止本阶段；若 oracle 有效而 OOF 无效，优先修复 parser 和 exposure gap。MoL、GRPO、PPO、GSPO、SAPO 与 OPD 均不在本阶段混跑。
+
+## 8. Oracle-memory feasibility probe 结果
+
+probe 只选择 v0.38A 相对 v0.37B 新放行的 35 条 Planning QA。推理 prompt 使用同帧 reference anchor 的 3--6 个对象 tuple，因此该 JSONL 被明确标记为 dev-only，禁止训练和晋级。DeepSeek 评测只发送原始问题、reference 与候选答案，oracle memory 不进入 API payload。
+
+| 指标 | 冻结 v0.37B | Oracle context | 差值 |
+| --- | ---: | ---: | ---: |
+| Changed answers | - | 2 / 35 | - |
+| Exact Match | 8.57% | 8.57% | 0 |
+| Token-F1 | 40.51% | 40.51% | 0 |
+| ROUGE-L | 39.28% | 39.28% | 0 |
+| Planning Judge /100 | 52.00 | 54.86 | +2.86 |
+
+两组均完成 35/35 Judge、失败为 0，且全部命中已有缓存。部分协议不计算 Final。结果说明对象图携带少量有效信号，但冻结模型几乎忽略从未训练过的 memory schema，不能据此直接启动完整三折 OOF。
+
+下一步先做 train-only pilot：按 scene 划分内部 train/validation，G00 与 G10 使用相同的纯 CE、样本数和 updates；G10 仅增加 gold/predicted graph-memory curriculum。只有 held-out-train 上 memory 使用率、Planning Token-F1 和动作一致性明显优于 G00，才投入正式三折 cross-fitting。
