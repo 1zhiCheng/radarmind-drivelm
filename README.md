@@ -149,9 +149,33 @@ v0.39 replaces the failed graph-memory branch with four task-specific rank-8 LoR
 
 On the exact same 1,812 eligible IDs, Final improves from **0.593502 to 0.607388** and every paired gate passes. Step 700 is therefore frozen in `best_checkpoint.json` as the trajectory-RL initialization. See the [full v0.39 report](docs/current/VERSION_0_39_DRIVELM_ADAPTIVE_MOL.md), [reproduction scripts](reproduction/qwen_vl_v039_mol/) and [machine-readable summary](results/v039b/summary.json).
 
+### v0.40 Planning trajectory RL: GRPO versus GSPO
+
+v0.40 freezes the v0.39B Perception/Prediction experts, builds trajectory state
+from predictions without gold leakage, and updates only the Planning LoRA.
+GRPO and GSPO share 10,813 train / 1,399 scene-isolated Planning QA, the same
+initialization, four-rollout budget, reward and 3×RTX 5090 setup.
+
+| Metric | MoL baseline | GRPO-70 | **GSPO-90** |
+| --- | ---: | ---: | ---: |
+| Trajectory reward /100 | 60.8118 | 61.1674 | **61.2600** |
+| Reward Token-F1 /100 | 55.8800 | 56.4231 | **56.5607** |
+| Reward ROUGE-L /100 | 55.0403 | 55.5712 | **55.7057** |
+| Action-F1 /100 | 66.3474 | **66.4189** | 66.3474 |
+| Exact Match /100 | 17.2981 | 17.5840 | **18.1558** |
+| DeepSeek Planning /100 | 71.2795 | 71.4582 | **71.5904** |
+
+All variants produced 1,399/1,399 predictions and completed 1,399/1,399 judge
+calls. Both RL candidates pass the frozen gates; **GSPO-90 is promoted**. It
+gains +0.4482 reward points, +0.8578 Exact Match points and +0.3109 Planning
+points over the MoL baseline. These are local Planning-only results, not an
+official hidden challenge score. See the [full report](docs/current/VERSION_0_40_DRIVELM_TRAJECTORY_RL.md),
+[reproduction scripts](reproduction/qwen_vl_v040_trajectory_rl/) and
+[machine-readable comparison](results/v040/final_comparison.json).
+
 ## Project status and TODO
 
-Active route: single-frame six-camera DriveLM-nuScenes, with v0.39B MoL step 700 as the current local-dev checkpoint and v0.39A retained as the immediate frozen control.
+Active route: single-frame six-camera DriveLM-nuScenes, with GSPO-90 as the promoted Planning trajectory policy and v0.39B MoL step 700 retained as its frozen initialization and control.
 
 - [x] Prepare the **26,095 train / 3,355 scene-isolated dev** dataset.
 - [x] Complete B00/B10/B11 CE-LoRA training and evaluation.
@@ -171,7 +195,7 @@ Active route: single-frame six-camera DriveLM-nuScenes, with v0.39B MoL step 700
 - [x] Close the graph-memory branch after its feasibility evidence remained too weak for full OOF training.
 - [x] Train shared-LoRA and four-expert MoL controls; confirm the MoL pilot passes full and same-ID gates.
 - [x] Run adaptive v0.39B checkpoint search through step 900 and promote **step 700: Final 0.608245**.
-- [ ] Train trajectory-policy controls from the frozen step-700 adapters and compare GRPO with GSPO under one reward/data budget.
+- [x] Complete matched GRPO/GSPO trajectory RL and promote **GSPO-90** after 100% same-ID Planning evaluation.
 
 ### Earlier v0.31 reproduction baseline
 
@@ -313,8 +337,10 @@ reproduction/qwen_vl_v037a/  candidate generation, preference audit and DPO
 reproduction/qwen_vl_v039_mol/ hard-routed LoRA experts, adaptive early stopping and finalization
 reproduction/qwen_vl_v037b/  balanced, CE-anchored conservative DPO and selection
 reproduction/qwen_vl_v038/   graph-anchor/coordinate data audit and controlled post-training
+reproduction/qwen_vl_v040_trajectory_rl/ leakage-free GRPO/GSPO training and evaluation
 reproduction/drivelm_ds_eval local structural/semantic proxy evaluator
 docs/current/                 current experiment contracts and results
+results/v040/                 compact selection, validation and final comparison
 docs/demos/                   continuous-video reproduction notes
 results/v039b/                compact v0.39B convergence, fairness and promotion summary
 reports/                      illustrated Chinese technical report

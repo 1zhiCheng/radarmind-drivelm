@@ -1,0 +1,21 @@
+{
+  "schema_version": "drivelm-v040-verl-loader-validation-v1",
+  "splits": {
+    "train": {
+      "full_rows": 10813,
+      "validated_rows": 4,
+      "sample_id": "faa975eaad804c85bd8f2da9b30c8d9a_99bcb06196bb4974bd600b4fc553caad_3",
+      "sample_images": 6,
+      "sample_upstream_steps": 3
+    },
+    "dev": {
+      "full_rows": 1399,
+      "validated_rows": 4,
+      "sample_id": "f0f120e4d4b0441da90ec53b16ee169d_4a0798f849ca477ab18009c3a20b7df2_4",
+      "sample_images": 6,
+      "sample_upstream_steps": 4
+    }
+  },
+  "scene_overlap": 0,
+  "valid": true
+}

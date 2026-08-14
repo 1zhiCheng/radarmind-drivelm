@@ -1,0 +1,94 @@
+{
+  "schema_version": "radarmind-v040-final-comparison-v1",
+  "scope": "1,399 scene-isolated planning trajectory dev rows; not the hidden challenge score",
+  "frozen_policy": "Require 100% coverage/judge completion, strict local reward and token-F1 gains, and no more than 0.5 DeepSeek planning points regression. Rank passing candidates by planning judge, then trajectory reward.",
+  "results": {
+    "baseline": {
+      "coverage": 1.0,
+      "score": 0.6081180970120713,
+      "token_f1_reward": 0.5587999235018273,
+      "rouge_l_reward": 0.5504030755120236,
+      "action_f1_reward": 0.6634739099356677,
+      "exact_reward": 0.1729807005003574,
+      "grounding_reward": 1.0,
+      "format_reward": 1.0,
+      "offline_exact": 0.1779842744817727,
+      "offline_token_f1": 0.5966981560266057,
+      "offline_rouge_l": 0.5794888378659825,
+      "planning_deepseek_100": 71.2794853466762,
+      "judge_complete": true,
+      "judge_completed": 1399
+    },
+    "grpo70": {
+      "coverage": 1.0,
+      "score": 0.6116739984320374,
+      "token_f1_reward": 0.5642310424436636,
+      "rouge_l_reward": 0.5557120530912971,
+      "action_f1_reward": 0.6641887062187269,
+      "exact_reward": 0.1758398856325947,
+      "grounding_reward": 1.0,
+      "format_reward": 1.0,
+      "offline_exact": 0.18155825589706934,
+      "offline_token_f1": 0.6019605735969252,
+      "offline_rouge_l": 0.5848085375068693,
+      "planning_deepseek_100": 71.45818441744103,
+      "judge_complete": true,
+      "judge_completed": 1399
+    },
+    "gspo90": {
+      "coverage": 1.0,
+      "score": 0.6126004919156551,
+      "token_f1_reward": 0.5656067938243987,
+      "rouge_l_reward": 0.5570569205356173,
+      "action_f1_reward": 0.6634739099356677,
+      "exact_reward": 0.18155825589706934,
+      "grounding_reward": 1.0,
+      "format_reward": 1.0,
+      "offline_exact": 0.18727662616154395,
+      "offline_token_f1": 0.6024776582900042,
+      "offline_rouge_l": 0.5855514886808519,
+      "planning_deepseek_100": 71.590421729807,
+      "judge_complete": true,
+      "judge_completed": 1399
+    }
+  },
+  "candidates": {
+    "grpo70": {
+      "delta_vs_baseline": {
+        "score": 0.00355590141996609,
+        "token_f1_reward": 0.005431118941836344,
+        "rouge_l_reward": 0.0053089775792735105,
+        "action_f1_reward": 0.0007147962830592602,
+        "exact_reward": 0.0028591851322372908,
+        "planning_deepseek_100": 0.1786990707648357
+      },
+      "promotion_gates": {
+        "coverage_100_percent": true,
+        "judge_complete": true,
+        "trajectory_reward_strictly_improved": true,
+        "token_f1_strictly_improved": true,
+        "planning_deepseek_regression_at_most_0_5": true
+      },
+      "eligible": true
+    },
+    "gspo90": {
+      "delta_vs_baseline": {
+        "score": 0.0044823949035838195,
+        "token_f1_reward": 0.006806870322571434,
+        "rouge_l_reward": 0.006653845023593674,
+        "action_f1_reward": 0.0,
+        "exact_reward": 0.008577555396711928,
+        "planning_deepseek_100": 0.31093638313080874
+      },
+      "promotion_gates": {
+        "coverage_100_percent": true,
+        "judge_complete": true,
+        "trajectory_reward_strictly_improved": true,
+        "token_f1_strictly_improved": true,
+        "planning_deepseek_regression_at_most_0_5": true
+      },
+      "eligible": true
+    }
+  },
+  "promoted": "gspo90"
+}
