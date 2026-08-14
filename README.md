@@ -10,7 +10,7 @@
 [![CI](https://github.com/1zhiCheng/radarmind-drivelm/actions/workflows/ci.yml/badge.svg)](https://github.com/1zhiCheng/radarmind-drivelm/actions)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 
-Single-frame six-view perception · Graph-VQA · Qwen2.5-VL LoRA · CE SFT + conservative DPO · local DriveLM-DS evaluation
+Single-frame six-view perception · Graph-VQA · Qwen2.5-VL · CE/DPO · adaptive Mixture of LoRA Experts · local DriveLM-DS evaluation
 
 </div>
 
@@ -43,6 +43,8 @@ The upstream DriveLM release provides data and challenge utilities, but not a co
 - six independent camera inputs in the fixed `front / front-left / front-right / back / back-left / back-right` order;
 - assistant-token-only autoregressive cross-entropy LoRA SFT;
 - task-balanced conservative DPO with a chosen-answer CE anchor;
+- answer-independent hard routing across four task-specific LoRA experts;
+- resumable checkpoint sweeps with validation-driven early stopping and automatic rollback;
 - single-GPU baseline and multi-GPU `accelerate` training;
 - resumable 3,355-QA inference with 100% coverage accounting;
 - lexical evaluation plus a cached DeepSeek replacement for the unavailable GPT semantic judge;
@@ -127,9 +129,28 @@ v0.38A increased eligible QA from **1,866 to 1,901** and anchor coordinate F1 fr
 
 v0.38B therefore uses strict scene-level out-of-fold graph memory and matched `G00`/`G10` pure-CE controls before any further preference optimization. See the [v0.38A result](docs/current/VERSION_0_38A_DRIVELM_GROUNDING_PREFERENCE.md), [v0.38B experiment contract](docs/current/VERSION_0_38B_DRIVELM_OOF_GRAPH_MEMORY.md), and compact [v0.38A](results/v038a/final_summary.json) / [v0.38B-0](results/v038b/anchor_route_summary.json) results.
 
+### v0.39 adaptive Mixture of LoRA Experts
+
+v0.39 replaces the failed graph-memory branch with four task-specific rank-8 LoRA adapters, hard-routed by the answer-independent official task key. A shared-LoRA control and a 100-step MoL pilot established feasibility. The v0.39B controller then evaluated every 100 steps, extended training only while the frozen Token-F1 criterion improved, and stopped after steps 800/900 both failed the `0.0005` minimum-delta rule.
+
+| Metric | v0.39A | **v0.39B step 700** | Delta |
+| --- | ---: | ---: | ---: |
+| Coverage | 100% | 100% | 0 |
+| Exact Match | 43.6066% | **43.9940%** | +0.3875pp |
+| Token-F1 | 73.2612% | **74.5346%** | +1.2735pp |
+| ROUGE-L | 71.3344% | **72.4050%** | +1.0706pp |
+| MC accuracy | 84.2697% | **84.4944%** | +0.2247pp |
+| Planning /100 | 70.7832 | **72.4769** | +1.6936 |
+| Coordinate F1 | 13.3838% | **14.6465%** | +1.2626pp |
+| Graph /100 | 44.9242 | **46.8561** | +1.9318 |
+| Match /100 | 29.1540 | **30.7513** | +1.5972 |
+| DriveLM-DS Final | 0.596955 | **0.608245** | **+0.011290** |
+
+On the exact same 1,812 eligible IDs, Final improves from **0.593502 to 0.607388** and every paired gate passes. Step 700 is therefore frozen in `best_checkpoint.json` as the trajectory-RL initialization. See the [full v0.39 report](docs/current/VERSION_0_39_DRIVELM_ADAPTIVE_MOL.md), [reproduction scripts](reproduction/qwen_vl_v039_mol/) and [machine-readable summary](results/v039b/summary.json).
+
 ## Project status and TODO
 
-Active route: single-frame six-camera DriveLM-nuScenes, with v0.37B step 75 as the current local-dev checkpoint and B10 retained as the frozen control.
+Active route: single-frame six-camera DriveLM-nuScenes, with v0.39B MoL step 700 as the current local-dev checkpoint and v0.39A retained as the immediate frozen control.
 
 - [x] Prepare the **26,095 train / 3,355 scene-isolated dev** dataset.
 - [x] Complete B00/B10/B11 CE-LoRA training and evaluation.
@@ -146,8 +167,10 @@ Active route: single-frame six-camera DriveLM-nuScenes, with v0.37B step 75 as t
 - [x] Complete v0.38A three-GPU DPO and four-checkpoint evaluation; grounding improved, but Final **0.59209** failed promotion.
 - [x] Run the v0.38B-0 anchor-routing diagnosis; newly eligible Planning QA average only **52.0**, so routing alone is insufficient.
 - [x] Run the 35-QA oracle-memory probe: Planning **52.00 -> 54.86**, but only 2 answers changed.
-- [ ] Run a train-only G00/G10 memory-consumption pilot; start strict scene-level OOF graph memory only if the pilot passes.
-- [ ] Consider preference optimization only after graph-memory SFT passes the same full-dev gates; MoL and online RL remain out of scope without supporting evidence.
+- [x] Close the graph-memory branch after its feasibility evidence remained too weak for full OOF training.
+- [x] Train shared-LoRA and four-expert MoL controls; confirm the MoL pilot passes full and same-ID gates.
+- [x] Run adaptive v0.39B checkpoint search through step 900 and promote **step 700: Final 0.608245**.
+- [ ] Train trajectory-policy controls from the frozen step-700 adapters and compare GRPO with GSPO under one reward/data budget.
 
 ### Earlier v0.31 reproduction baseline
 
@@ -286,11 +309,13 @@ challenge/                    official DriveLM extraction and evaluation tools
 reproduction/qwen_vl/        dataset, single-GPU SFT, inference and lexical eval
 reproduction/qwen_vl_v036/   controlled pure-CE multi-GPU trainer
 reproduction/qwen_vl_v037a/  candidate generation, preference audit and DPO
+reproduction/qwen_vl_v039_mol/ hard-routed LoRA experts, adaptive early stopping and finalization
 reproduction/qwen_vl_v037b/  balanced, CE-anchored conservative DPO and selection
 reproduction/qwen_vl_v038/   graph-anchor/coordinate data audit and controlled post-training
 reproduction/drivelm_ds_eval local structural/semantic proxy evaluator
 docs/current/                 current experiment contracts and results
 docs/demos/                   continuous-video reproduction notes
+results/v039b/                compact v0.39B convergence, fairness and promotion summary
 reports/                      illustrated Chinese technical report
 results/v037b/                compact, machine-readable v0.37B experiment manifests
 assets/                       preview images and full MP4 demos

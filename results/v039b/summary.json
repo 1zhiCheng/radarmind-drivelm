@@ -1,0 +1,46 @@
+{
+  "schema_version": "drivelm-v039b-published-summary-v1",
+  "protocol": {
+    "start": "v0.37B checkpoint-75",
+    "architecture": "hard-routed four-expert LoRA (Perception/Prediction/Planning/Behavior)",
+    "train_objective": "assistant-token-only cross entropy",
+    "evaluated_steps": [100, 200, 300, 400, 500, 600, 700, 800, 900],
+    "selection_metric": "overall Token-F1 with planning, MC, eligibility and grounding safety gates",
+    "min_delta": 0.0005,
+    "patience": 2,
+    "selected_step": 700
+  },
+  "v039a_baseline": {
+    "token_f1": 0.7326117797164289,
+    "planning_token_f1": 0.5870229286157287,
+    "mc_accuracy": 0.8426966292134831,
+    "coordinate_f1": 0.13383838157407407,
+    "drivelm_ds_final": 0.5969547037413552
+  },
+  "v039b_checkpoint_700": {
+    "coverage": 1.0,
+    "exact_match": 0.4399403874813711,
+    "token_f1": 0.7453464037667928,
+    "rouge_l": 0.7240495705826305,
+    "planning_token_f1": 0.6147097854347925,
+    "mc_accuracy": 0.8449438202247191,
+    "eligible_count": 1911,
+    "coordinate_f1": 0.146464644006734,
+    "planning_deepseek_100": 72.47685185185185,
+    "graph_deepseek_100": 46.85606060606061,
+    "match_score_100": 30.751262503367006,
+    "drivelm_ds_final": 0.6082448326044415
+  },
+  "same_id_audit": {
+    "common_ids": 1812,
+    "baseline_final": 0.5935022731761035,
+    "candidate_final": 0.6073880186183197,
+    "delta_final": 0.013885745442216213,
+    "planning_delta": 2.487520798668882,
+    "paired_audit_passed": true
+  },
+  "promotion": {
+    "promoted": true,
+    "next_stage": "trajectory RL GRPO/GSPO"
+  }
+}
