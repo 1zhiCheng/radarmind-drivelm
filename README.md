@@ -32,7 +32,8 @@ Single-frame six-view perception · Graph-VQA · Qwen2.5-VL · CE/DPO · adaptiv
 
 <p align="center">
   Both inline animations cover the full 32-second scene; click either animation for the original 24 FPS MP4 ·
-  <a href="reports/drivelm_reproduction_v1/drivelm_reproduction_technical_report.pdf">technical report</a>
+  <a href="reports/drivelm_reproduction_v1/drivelm_reproduction_technical_report.pdf">technical report</a> ·
+  <a href="docs/current/RESUME_PROJECT_DRIVELM_TRAJECTORY.md">resume-ready project summary</a>
 </p>
 
 ## What this repository adds
