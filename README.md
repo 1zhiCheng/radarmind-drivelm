@@ -73,6 +73,48 @@ The active leaderboard path is camera-only and single-frame. Radar, LiDAR, map, 
 
 ## Results
 
+### End-to-end promotion chain
+
+The full-task rows below use the same 3,355-QA local dev. A raw 7B zero-shot
+score was never formally measured, so it remains blank rather than fabricated.
+`🏆` marks the checkpoint promoted into the next stage.
+
+<table>
+  <thead>
+    <tr><th>Stage</th><th>Variant</th><th>Scope</th><th>EM</th><th>Token-F1</th><th>Planning</th><th>DriveLM-DS Final</th><th>Decision</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Raw VLM</td><td>Qwen2.5-VL-7B zero-shot</td><td>Not yet evaluated</td><td>—</td><td>—</td><td>—</td><td>—</td><td>Pending control</td></tr>
+    <tr><td>SFT</td><td><strong>B10 CE-LoRA</strong></td><td>3,355 all-task</td><td>43.4575%</td><td>73.0000%</td><td>70.6348</td><td><strong>0.594636</strong></td><td><strong>🏆 Promoted</strong></td></tr>
+    <tr><td rowspan="2">DPO</td><td>Standard DPO-100</td><td>3,355 all-task</td><td>43.55%</td><td>73.17%</td><td>69.75</td><td>0.59430</td><td>Rejected</td></tr>
+    <tr><td><strong>Conservative DPO-75</strong></td><td>3,355 all-task</td><td>43.5768%</td><td>73.1231%</td><td>70.8571</td><td><strong>0.596356</strong></td><td><strong>🏆 Promoted</strong></td></tr>
+    <tr><td>Mixture of LoRA</td><td><strong>MoL step 700</strong></td><td>3,355 all-task</td><td>43.9940%</td><td>74.5346%</td><td>72.4769</td><td><strong>0.608245</strong></td><td><strong>🏆 Promoted</strong></td></tr>
+  </tbody>
+</table>
+
+Trajectory RL currently has a Planning-only score, so it is shown in a nested
+same-protocol table instead of being mislabeled as a new Final:
+
+<table>
+  <thead>
+    <tr><th>Stage</th><th>Variant</th><th>Trajectory reward</th><th>Exact</th><th>Planning judge</th><th>Decision</th></tr>
+  </thead>
+  <tbody>
+    <tr><td rowspan="3">Trajectory RL</td><td>MoL control</td><td>60.8118</td><td>17.2981%</td><td>71.2795</td><td>Frozen control</td></tr>
+    <tr><td>GRPO-70</td><td>61.1674</td><td>17.5840%</td><td>71.4582</td><td>Passed gates</td></tr>
+    <tr><td><strong>GSPO-90</strong></td><td><strong>61.2600</strong></td><td><strong>18.1558%</strong></td><td><strong>71.5904</strong></td><td><strong>🏆 Planning promoted</strong></td></tr>
+  </tbody>
+</table>
+
+From SFT to MoL, DriveLM-DS Final rises from **0.594636 to 0.608245**
+(**+0.013609, +2.29% relative**). GSPO-90 is the best Planning trajectory
+policy, but it will receive a full-system promotion only after it is routed back
+into all 3,355 QA and passes the same-ID DriveLM-DS audit.
+
+Why trajectory reward is not Final, complete metrics, formulas, and missing
+controls are documented in the
+[full performance evolution report](docs/current/DRIVELM_PIPELINE_PERFORMANCE_EVOLUTION.md).
+
 ### v0.36 controlled B00/B10/B11 comparison
 
 All variants use the same 26,095 training QA, 3,355 scene-isolated dev QA, six-camera prompt, assistant-token-only CE objective, effective global batch size of 4, LoRA rank 8 and seed 42. B00 -> B10 changes only model capacity; B10 -> B11 changes only the visual budget.

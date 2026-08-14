@@ -1,5 +1,7 @@
 # v0.40：DriveLM Planning Trajectory RL（GRPO vs GSPO）
 
+跨 SFT、DPO、MoL、GRPO/GSPO 的统一分层对比见 [DriveLM 全流程性能演进](DRIVELM_PIPELINE_PERFORMANCE_EVOLUTION.md)。
+
 ## 版本结论
 
 v0.40 从已晋级的 v0.39B MoL step 700 初始化 Planning 专家，将单条 QA
