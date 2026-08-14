@@ -1,0 +1,82 @@
+{
+  "schema_version": "radarmind-v040-full-system-summary-v1",
+  "scope": "3,355 scene-isolated all-task dev; local DriveLM-DS proxy",
+  "results": {
+    "raw": {
+      "coverage": 1.0,
+      "exact_match": 0.13710879284649777,
+      "token_f1": 0.24234001985540823,
+      "rouge_l": 0.2173763446700074,
+      "mc_accuracy": 0.5168539325842697,
+      "eligible": 1533,
+      "planning_deepseek_100": 36.83083511777302,
+      "coordinate_f1": 0.0,
+      "drivelm_ds_final": 0.25796073736908504,
+      "judge_complete": true,
+      "judge_completed": 599
+    },
+    "grpo70": {
+      "coverage": 1.0,
+      "exact_match": 0.43546944858420267,
+      "token_f1": 0.740030115432612,
+      "rouge_l": 0.7190474461409821,
+      "mc_accuracy": 0.8449438202247191,
+      "eligible": 1911,
+      "planning_deepseek_100": 72.09104938271605,
+      "coordinate_f1": 0.146464644006734,
+      "drivelm_ds_final": 0.6067016227278984,
+      "judge_complete": true,
+      "judge_completed": 780,
+      "delta_vs_mol700": {
+        "exact_match": -0.0044709388971684305,
+        "token_f1": -0.005316288334180852,
+        "rouge_l": -0.005002124441648381,
+        "mc_accuracy": 0.0,
+        "planning_deepseek_100": -0.38580246913579685,
+        "coordinate_f1": 0.0,
+        "drivelm_ds_final": -0.0015432098765431057
+      },
+      "same_id_audit_passed": false,
+      "same_id_final_delta": -0.0015432098765431057
+    },
+    "gspo90": {
+      "coverage": 1.0,
+      "exact_match": 0.43785394932935917,
+      "token_f1": 0.7402457343552998,
+      "rouge_l": 0.7193572490299245,
+      "mc_accuracy": 0.8449438202247191,
+      "eligible": 1911,
+      "planning_deepseek_100": 72.07561728395062,
+      "coordinate_f1": 0.146464644006734,
+      "drivelm_ds_final": 0.6066398943328366,
+      "judge_complete": true,
+      "judge_completed": 780,
+      "delta_vs_mol700": {
+        "exact_match": -0.002086438152011927,
+        "token_f1": -0.0051006694114930085,
+        "rouge_l": -0.004692321552706047,
+        "mc_accuracy": 0.0,
+        "planning_deepseek_100": -0.401234567901227,
+        "coordinate_f1": 0.0,
+        "drivelm_ds_final": -0.0016049382716049054
+      },
+      "same_id_audit_passed": false,
+      "same_id_final_delta": -0.0016049382716049054
+    },
+    "mol700": {
+      "coverage": 1.0,
+      "exact_match": 0.4399403874813711,
+      "token_f1": 0.7453464037667928,
+      "rouge_l": 0.7240495705826305,
+      "mc_accuracy": 0.8449438202247191,
+      "eligible": 1911,
+      "planning_deepseek_100": 72.47685185185185,
+      "coordinate_f1": 0.146464644006734,
+      "drivelm_ds_final": 0.6082448326044415,
+      "judge_complete": true,
+      "judge_completed": 780
+    }
+  },
+  "promotion_policy": "100% coverage and judge completion, strict full Final gain, and all same-ID gates",
+  "promoted": "mol700"
+}

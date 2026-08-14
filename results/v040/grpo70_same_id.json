@@ -1,0 +1,73 @@
+{
+  "schema_version": "drivelm-v037b-common-gating-comparison-v1",
+  "subset": {
+    "schema_version": "drivelm-v037b-common-gating-audit-v1",
+    "full_reference_count": 3355,
+    "baseline_eligible": 1911,
+    "candidate_eligible": 1911,
+    "common_eligible": 1911,
+    "baseline_only": 0,
+    "candidate_only": 0,
+    "common_by_tag": {
+      "0": 664,
+      "1": 648,
+      "2": 467,
+      "3": 132
+    },
+    "common_reference_count": 1911,
+    "baseline_common_predictions": 1911,
+    "candidate_common_predictions": 1911
+  },
+  "baseline": {
+    "exact_match": 0.34798534798534797,
+    "token_f1": 0.7171267370204711,
+    "rouge_l": 0.6873882255658492,
+    "mc_accuracy": 0.78125,
+    "accuracy": 0.8087349397590361,
+    "planning": 72.47685185185185,
+    "language": 0.4754395611924645,
+    "coordinate_f1": 0.146464644006734,
+    "graph": 46.85606060606061,
+    "match": 30.751262503367006,
+    "final": 0.6082448326044415
+  },
+  "candidate": {
+    "exact_match": 0.34327577184720043,
+    "token_f1": 0.7147404625957856,
+    "rouge_l": 0.6847307435649989,
+    "mc_accuracy": 0.78125,
+    "accuracy": 0.8087349397590361,
+    "planning": 72.09104938271605,
+    "language": 0.4754395611924645,
+    "coordinate_f1": 0.146464644006734,
+    "graph": 46.85606060606061,
+    "match": 30.751262503367006,
+    "final": 0.6067016227278984
+  },
+  "delta": {
+    "exact_match": -0.004709576138147542,
+    "token_f1": -0.0023862744246855305,
+    "rouge_l": -0.002657482000850364,
+    "mc_accuracy": 0.0,
+    "accuracy": 0.0,
+    "planning": -0.38580246913579685,
+    "language": 0.0,
+    "coordinate_f1": 0.0,
+    "graph": 0.0,
+    "match": 0.0,
+    "final": -0.0015432098765431057
+  },
+  "judge_completed": {
+    "baseline": 780,
+    "candidate": 780
+  },
+  "paired_gates": {
+    "same_reference_and_prediction_count": true,
+    "both_judges_complete": true,
+    "final_strictly_improved": false,
+    "planning_regression_at_most_0_5_points": true,
+    "coordinate_f1_regression_at_most_0_5pp": true,
+    "mc_not_below_b10": true
+  },
+  "paired_audit_passed": false
+}

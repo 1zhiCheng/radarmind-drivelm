@@ -46,6 +46,23 @@ passes every frozen gate, but GSPO-90 ranks higher by Planning judge and then
 trajectory reward. These are local Planning results, not a hidden-server score
 or a claim over all 3,355 task-family QA.
 
+## Full-system completion
+
+The selected RL Planning answers were routed back into the frozen v0.39B
+Perception, Prediction, and Behavior experts. A raw 7B zero-shot control and
+both RL candidates then completed all 3,355 QA and same-ID audits.
+
+| Metric | Raw 7B | **MoL-700** | GRPO-70 | GSPO-90 |
+| --- | ---: | ---: | ---: | ---: |
+| Exact Match | 13.7109% | **43.9940%** | 43.5469% | 43.7854% |
+| Token-F1 | 24.2340% | **74.5346%** | 74.0030% | 74.0246% |
+| Planning /100 | 36.8308 | **72.4769** | 72.0910 | 72.0756 |
+| DriveLM-DS Final | 0.257961 | **0.608245** | 0.606702 | 0.606640 |
+
+All prediction and judge coverage is 100%. GRPO and GSPO use exactly the same
+1,911 graph-eligible IDs as MoL-700, but both lower Final and fail the paired
+promotion gate. **MoL-700 remains the full-system baseline.**
+
 ## Reproduce
 
 ```bash
@@ -53,6 +70,7 @@ cd /path/to/DriveLM-main
 bash reproduction/qwen_vl_v040_trajectory_rl/run_v040_pipeline.sh
 bash reproduction/qwen_vl_v040_trajectory_rl/run_final_eval.sh
 bash reproduction/qwen_vl_v040_trajectory_rl/run_semantic_eval.sh
+bash reproduction/qwen_vl_v040_trajectory_rl/run_full_system_completion.sh
 ```
 
 The launchers expose their machine-specific paths at the top. Expected markers

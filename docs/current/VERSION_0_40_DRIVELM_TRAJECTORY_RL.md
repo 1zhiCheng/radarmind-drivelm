@@ -6,7 +6,7 @@
 
 v0.40 从已晋级的 v0.39B MoL step 700 初始化 Planning 专家，将单条 QA
 升级为带上游预测状态的 trajectory policy，在相同数据、rollout、训练预算下
-对照 GRPO 与 GSPO。**GRPO-70 与 GSPO-90 均通过门槛，GSPO-90 正式晋级。**
+对照 GRPO 与 GSPO。**GSPO-90 赢得 Planning trajectory 子协议，但两种 RL policy 接回完整系统后均未超过 MoL-700，因此全系统不晋级。**
 
 ## 模型与数据链路
 
@@ -94,9 +94,32 @@ Planning judge 下降不超过 0.5。两者均通过；按 Planning judge、rewa
 `final_eval/final_comparison.json`；本机 adapter 位于
 `exports/grpo-step70/lora_adapter` 与 `exports/gspo-step90/lora_adapter`。
 
+## 完整 3,355-QA 系统验收
+
+将 RL Planning 输出接回 v0.39B 四专家 router；Perception、Prediction、
+Behavior 保持冻结。三者 graph-eligible ID 完全相同，均为 1,911，因此比较不受
+gating 数量变化影响。
+
+| 指标 | **MoL-700** | GRPO-70 | GSPO-90 |
+| --- | ---: | ---: | ---: |
+| Coverage | 100% | 100% | 100% |
+| Exact Match | **43.9940%** | 43.5469% | 43.7854% |
+| Token-F1 | **74.5346%** | 74.0030% | 74.0246% |
+| ROUGE-L | **72.4050%** | 71.9047% | 71.9357% |
+| MC accuracy | 84.4944% | 84.4944% | 84.4944% |
+| Planning /100 | **72.4769** | 72.0910 | 72.0756 |
+| DriveLM-DS Final | **0.608245** | 0.606702 | 0.606640 |
+| Judge complete | 780/780 | 780/780 | 780/780 |
+| Same-ID audit | baseline | 未通过 | 未通过 |
+
+GRPO 与 GSPO 的 Final 分别下降 0.001543 和 0.001605。二者都满足 coverage、
+judge completion、coordinate 和 MC 稳定性门槛，但未满足“Final 严格提升”，
+所以 **MoL-700 保持全系统主线**。Planning-only reward 的提升没有转化为完整
+graph-eligible Planning 子集上的增益，这是本版本最重要的负结果。
+
 ## 真实性边界与下一步
 
-这是本地 scene-isolated Planning trajectory dev，不是官方隐藏榜单，也不代表
-全任务 3,355 QA 同步提高。当前仍为单帧六路相机，没有混入雷达、LiDAR、
-CARLA 或历史帧。后续以 GSPO-90 为唯一基线，比较更长 trajectory、多轮
-credit assignment 或 Agentic rollout，并保留 camera-only control。
+所有全系统结果均为本地 scene-isolated 3,355-QA DriveLM-DS 代理分数，不是官方
+隐藏榜单。当前仍为单帧六路相机，没有混入雷达、LiDAR、CARLA 或历史帧。
+下一轮 RL 应直接对齐 graph-eligible Planning/Final 或做双重验证门控，并继续以
+MoL-700 为全系统初始化和回退基线。

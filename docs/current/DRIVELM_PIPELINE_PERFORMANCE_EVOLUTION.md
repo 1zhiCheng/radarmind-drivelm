@@ -26,9 +26,9 @@ Final = 0.4 × Planning + 0.2 × Language
 ```
 
 它依赖完整 3,355 条 Perception、Prediction、Planning、Behavior 输出、graph
-gating、坐标 grounding 和语义 judge。v0.40 只替换 Planning policy，并仅在
-1,399 条 Planning trajectory 上评测，所以当时只能报告 Trajectory reward，
-不能诚实地填写新的 DriveLM-DS Final。
+gating、坐标 grounding 和语义 judge。v0.40 最初只在 1,399 条 Planning
+trajectory 上选点，随后已将两种 RL policy 接回四专家 router，补齐完整
+3,355-QA DriveLM-DS 和 same-ID 审计。
 
 ## 2. 全任务累计晋级链
 
@@ -55,9 +55,9 @@ gating、坐标 grounding 和语义 judge。v0.40 只替换 Planning policy，�
     <tr>
       <td>原始基模</td>
       <td>Qwen2.5-VL-7B-Instruct zero-shot</td>
-      <td>尚未正式评测</td>
-      <td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td>
-      <td>待补基模对照</td>
+      <td>3,355 全任务</td>
+      <td>13.7109%</td><td>24.2340%</td><td>21.7376%</td><td>51.6854%</td><td>36.8308</td><td>0.257961</td><td>原始起点</td>
+      <td>zero-shot control</td>
     </tr>
     <tr>
       <td>SFT</td>
@@ -92,24 +92,25 @@ gating、坐标 grounding 和语义 judge。v0.40 只替换 Planning policy，�
     <tr>
       <td rowspan="2">Trajectory RL</td>
       <td>GRPO-70</td>
-      <td>1,399 Planning</td>
-      <td>17.5840%</td><td>56.4231%*</td><td>55.5712%*</td><td>—</td>
-      <td>71.4582</td><td>待全协议评测</td><td>Reward +0.003556</td>
-      <td>✓ 通过门槛</td>
+      <td>3,355 全任务</td>
+      <td>43.5469%</td><td>74.0030%</td><td>71.9047%</td><td>84.4944%</td>
+      <td>72.0910</td><td>0.606702</td><td>-0.001543</td>
+      <td>✗ 全系统未晋级</td>
     </tr>
     <tr>
-      <td><strong>GSPO-90</strong></td>
-      <td>1,399 Planning</td>
-      <td>18.1558%</td><td>56.5607%*</td><td>55.7057%*</td><td>—</td>
-      <td><strong>71.5904</strong></td><td>待全协议评测</td>
-      <td><strong>Reward +0.004482</strong></td><td><strong>🏆 Planning 晋级</strong></td>
+      <td>GSPO-90</td>
+      <td>3,355 全任务</td>
+      <td>43.7854%</td><td>74.0246%</td><td>71.9357%</td><td>84.4944%</td>
+      <td>72.0756</td><td>0.606640</td><td>-0.001605</td>
+      <td>✗ 全系统未晋级</td>
     </tr>
   </tbody>
 </table>
 
-\* RL 表中的 Token-F1/ROUGE-L 来自 trajectory reward 的 normalization；与旧版
-全任务离线 evaluator 数值不可直接相减。RL 的直接 control 是同一 trajectory
-prompt 下的 MoL Planning adapter，而不是上表 MoL 全协议的 graph-gated Planning。
+完整系统中 MoL/GRPO/GSPO 的 perception、prediction、behavior 与 graph
+eligibility 完全相同，均为 1,911；只替换 Planning 答案。因此 Final 下降不是
+gating 子集变化造成的，而是 trajectory policy 在 graph-eligible Planning
+子集上的泛化没有超过原 MoL Planning expert。
 
 ## 3. RL 内部严格同口径比较
 
@@ -147,20 +148,19 @@ Planning judge 和次排序 reward 上均更高。
 
 ## 4. 可以得出的累计结论
 
+- 原始 7B zero-shot 到垂域 SFT，Final：`0.257961 -> 0.594636`，
+  绝对提升 `+0.336675`，相对提升约 `+130.52%`。
 - 从 7B SFT 到 conservative DPO，Final：`0.594636 -> 0.596356`。
 - 从 DPO 到 adaptive MoL，Final：`0.596356 -> 0.608245`。
 - 从 7B SFT 到 MoL，Final 累计提高 `+0.013609`，相对提高约 `+2.29%`。
 - 在 Planning trajectory 子协议中，GSPO-90 优于 MoL control 与 GRPO-70。
-- 现在不能宣称“RL 将 Final 提升到某个数”，因为该全协议实验尚未完成。
+- 完整协议中 GRPO/GSPO Final 为 0.606702/0.606640，均低于 MoL 0.608245，
+  所以 **MoL-700 继续作为全系统主线**。
 
-## 5. 补齐最终单表所需实验
+## 5. 补齐实验验收
 
-1. 对未微调 Qwen2.5-VL-7B 运行 3,355-QA zero-shot inference 与 DriveLM-DS，
-   填入原始基模行。
-2. 将 GRPO-70、GSPO-90 分别接回四专家 router，只替换 Planning adapter。
-3. 对两者运行完整 3,355-QA inference、100% judge-complete DriveLM-DS。
-4. 对 MoL/GRPO/GSPO 计算共同 graph-eligible ID 的 same-ID 公平性审计。
-5. 只有通过 Final、Planning、coverage、judge completeness 和 same-ID gates，
-   才把 GSPO 从“Planning 晋级”升级为“全系统正式晋级”。
-
-完成这组测试后，表内所有主线阶段都能用同一个 DriveLM-DS Final 纵向比较。
+- [x] Raw 7B：3,355/3,355 coverage，599/599 judge，0 failures。
+- [x] GRPO-70：3,355/3,355 coverage，780/780 judge，0 failures。
+- [x] GSPO-90：3,355/3,355 coverage，780/780 judge，0 failures。
+- [x] 两个 RL 候选与 MoL 的 graph-eligible ID 完全相同：1,911/1,911。
+- [x] same-ID 审计确认两者 Final 都严格下降，均不通过全系统晋级门槛。

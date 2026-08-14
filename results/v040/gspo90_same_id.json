@@ -1,0 +1,73 @@
+{
+  "schema_version": "drivelm-v037b-common-gating-comparison-v1",
+  "subset": {
+    "schema_version": "drivelm-v037b-common-gating-audit-v1",
+    "full_reference_count": 3355,
+    "baseline_eligible": 1911,
+    "candidate_eligible": 1911,
+    "common_eligible": 1911,
+    "baseline_only": 0,
+    "candidate_only": 0,
+    "common_by_tag": {
+      "0": 664,
+      "1": 648,
+      "2": 467,
+      "3": 132
+    },
+    "common_reference_count": 1911,
+    "baseline_common_predictions": 1911,
+    "candidate_common_predictions": 1911
+  },
+  "baseline": {
+    "exact_match": 0.34798534798534797,
+    "token_f1": 0.7171267370204711,
+    "rouge_l": 0.6873882255658492,
+    "mc_accuracy": 0.78125,
+    "accuracy": 0.8087349397590361,
+    "planning": 72.47685185185185,
+    "language": 0.4754395611924645,
+    "coordinate_f1": 0.146464644006734,
+    "graph": 46.85606060606061,
+    "match": 30.751262503367006,
+    "final": 0.6082448326044415
+  },
+  "candidate": {
+    "exact_match": 0.3458922030350602,
+    "token_f1": 0.7136205701649364,
+    "rouge_l": 0.683805181310982,
+    "mc_accuracy": 0.78125,
+    "accuracy": 0.8087349397590361,
+    "planning": 72.07561728395062,
+    "language": 0.4754395611924645,
+    "coordinate_f1": 0.146464644006734,
+    "graph": 46.85606060606061,
+    "match": 30.751262503367006,
+    "final": 0.6066398943328366
+  },
+  "delta": {
+    "exact_match": -0.002093144950287784,
+    "token_f1": -0.0035061668555347314,
+    "rouge_l": -0.003583044254867218,
+    "mc_accuracy": 0.0,
+    "accuracy": 0.0,
+    "planning": -0.401234567901227,
+    "language": 0.0,
+    "coordinate_f1": 0.0,
+    "graph": 0.0,
+    "match": 0.0,
+    "final": -0.0016049382716049054
+  },
+  "judge_completed": {
+    "baseline": 780,
+    "candidate": 780
+  },
+  "paired_gates": {
+    "same_reference_and_prediction_count": true,
+    "both_judges_complete": true,
+    "final_strictly_improved": false,
+    "planning_regression_at_most_0_5_points": true,
+    "coordinate_f1_regression_at_most_0_5pp": true,
+    "mc_not_below_b10": true
+  },
+  "paired_audit_passed": false
+}
