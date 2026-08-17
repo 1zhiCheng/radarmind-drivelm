@@ -1,0 +1,64 @@
+{
+  "schema_version": "radarmind-drivelm-v042-summary-v1",
+  "dev": {
+    "trajectories": 467,
+    "qa_nodes": 3355,
+    "coverage": 1.0,
+    "context_policy": "all upstream answers are model predictions; no gold answers"
+  },
+  "baseline": {
+    "name": "v0.39B MoL-700",
+    "exact_match": 0.4399403874813711,
+    "token_f1": 0.7453464037667928,
+    "rouge_l": 0.7240495705826305,
+    "mc_accuracy": 0.8449438202247191,
+    "planning_deepseek_100": 72.47685185185185,
+    "coordinate_f1": 0.146464644006734,
+    "drivelm_ds_final": 0.6082448326044415,
+    "decision": "retained"
+  },
+  "v042a": {
+    "name": "pure Graph-CE checkpoint-600",
+    "graph_dev_nll": 0.3671275649661079,
+    "exact_match": 0.43040238450074514,
+    "token_f1": 0.7304459676887601,
+    "rouge_l": 0.7100259680962104,
+    "mc_accuracy": 0.8370786516853933,
+    "planning_deepseek_100": 71.29742033383916,
+    "coordinate_f1": 0.22727272356060607,
+    "drivelm_ds_final": 0.6099981170501279,
+    "judge": {"completed": 791, "failures": 0},
+    "same_id": {
+      "count": 1848,
+      "baseline_final": 0.6095634989386678,
+      "candidate_final": 0.6061355865568308,
+      "final_delta": -0.0034279123818370394,
+      "planning_delta_100": -2.2240259740259773,
+      "paired_audit_passed": false
+    },
+    "decision": "rejected"
+  },
+  "v042b": {
+    "name": "Graph plus task-balanced CE anchors checkpoint-600",
+    "graph_dev_nll": 0.37045328502168445,
+    "exact_match": 0.4262295081967213,
+    "token_f1": 0.7256474059247168,
+    "rouge_l": 0.7054555990816439,
+    "mc_accuracy": 0.8348314606741573,
+    "planning_deepseek_100": 70.69767441860465,
+    "coordinate_f1": 0.21464646109006735,
+    "drivelm_ds_final": 0.605430165109824,
+    "judge": {"completed": 777, "failures": 0},
+    "same_id": {
+      "count": 1827,
+      "baseline_final": 0.6076494355474341,
+      "candidate_final": 0.6019712016243847,
+      "final_delta": -0.005678233923049447,
+      "planning_delta_100": -2.4506578947368496,
+      "paired_audit_passed": false
+    },
+    "decision": "rejected"
+  },
+  "promotion": "MoL-700 remains the full-system baseline",
+  "next_experiment": "train-only predicted-upstream scheduled sampling or DAgger with Planning consistency CE"
+}

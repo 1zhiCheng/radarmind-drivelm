@@ -45,6 +45,7 @@ The upstream DriveLM release provides data and challenge utilities, but not a co
 - assistant-token-only autoregressive cross-entropy LoRA SFT;
 - task-balanced conservative DPO with a chosen-answer CE anchor;
 - answer-independent hard routing across four task-specific LoRA experts;
+- frame-level Perception → Prediction → Planning → Behavior Graph-SFT with predicted-context rollout and same-ID gates;
 - resumable checkpoint sweeps with validation-driven early stopping and automatic rollback;
 - single-GPU baseline and multi-GPU `accelerate` training;
 - resumable 3,355-QA inference with 100% coverage accounting;
@@ -91,6 +92,8 @@ selection does not count as full-system promotion.
     <tr><td>Mixture of LoRA</td><td><strong>MoL step 700</strong></td><td>3,355 all-task</td><td>43.9940%</td><td>74.5346%</td><td>72.4769</td><td><strong>0.608245</strong></td><td><strong>🏆 Promoted</strong></td></tr>
     <tr><td rowspan="2">Trajectory RL</td><td>GRPO-70</td><td>3,355 all-task</td><td>43.5469%</td><td>74.0030%</td><td>72.0910</td><td>0.606702</td><td>Rejected by Final</td></tr>
     <tr><td>GSPO-90</td><td>3,355 all-task</td><td>43.7854%</td><td>74.0246%</td><td>72.0756</td><td>0.606640</td><td>Rejected by Final</td></tr>
+    <tr><td rowspan="2">Graph trajectory SFT</td><td>v0.42A pure Graph-CE</td><td>3,355 predicted-context</td><td>43.0402%</td><td>73.0446%</td><td>71.2974</td><td>0.609998</td><td>Rejected by same-ID</td></tr>
+    <tr><td>v0.42B Graph + CE anchors</td><td>3,355 predicted-context</td><td>42.6230%</td><td>72.5647%</td><td>70.6977</td><td>0.605430</td><td>Rejected</td></tr>
   </tbody>
 </table>
 
@@ -244,9 +247,32 @@ DriveLM-domain SFT/MoL models, especially on Prediction and Planning. See the
 [machine-readable metrics](results/v041/qwen38max_partial_764.json), and
 [764 prediction records](results/v041/qwen38max_dev_predictions_764.jsonl).
 
+### v0.42 four-stage Graph trajectory SFT
+
+v0.42 reconnects every frame as a causal multi-turn trajectory: six cameras →
+Perception → Prediction → Planning → Behavior. v0.42A trains ordinary CE on all
+assistant spans; v0.42B adds an equal number of task-balanced single-node CE
+anchors. Both select step 600 after full 467-trajectory NLL sweeps and then run
+3,355-QA rollouts using model-predicted upstream answers only.
+
+| Metric | **MoL-700** | v0.42A | v0.42B |
+| --- | ---: | ---: | ---: |
+| Coordinate F1 | 14.6465% | **22.7273%** | 21.4646% |
+| Planning /100 | **72.4769** | 71.2974 | 70.6977 |
+| Candidate-dependent Final | 0.608245 | **0.609998** | 0.605430 |
+| Same-ID Final delta vs MoL | control | -0.003428 | -0.005678 |
+| Promotion | **retained** | rejected | rejected |
+
+The higher v0.42A full Final is caused by a grounding/eligibility trade-off and
+does not survive the exact 1,848-ID paired audit. The result is retained as a
+controlled demonstration that teacher-forced Graph-CE improves grounding but
+requires scheduled sampling or DAgger to avoid Planning exposure mismatch. See
+the [full v0.42 report](docs/current/VERSION_0_42_DRIVELM_GRAPH_TRAJECTORY_SFT.md)
+and [reproduction code](reproduction/qwen_vl_v042_graph/).
+
 ## Project status and TODO
 
-Active route: single-frame six-camera DriveLM-nuScenes, with v0.39B MoL step 700 retained as the promoted full-system baseline; GSPO-90 is preserved as the Planning-only trajectory winner and a controlled negative full-system result.
+Active route: single-frame six-camera DriveLM-nuScenes, with v0.39B MoL step 700 retained as the promoted full-system baseline. GSPO-90 and v0.42A/B Graph-SFT are preserved as controlled negative full-system results; the next Graph iteration targets predicted-upstream scheduled sampling rather than more teacher-forced steps.
 
 - [x] Prepare the **26,095 train / 3,355 scene-isolated dev** dataset.
 - [x] Complete B00/B10/B11 CE-LoRA training and evaluation.
@@ -268,6 +294,7 @@ Active route: single-frame six-camera DriveLM-nuScenes, with v0.39B MoL step 700
 - [x] Run adaptive v0.39B checkpoint search through step 900 and promote **step 700: Final 0.608245**.
 - [x] Complete GRPO/GSPO Planning-only and 3,355-QA full-system evaluation; retain **MoL-700** after both RL candidates fail the Final/same-ID gates.
 - [x] Record a strict same-ID 764-QA `qwen3.8-max` API audit without mixing partial results into the full leaderboard.
+- [x] Complete v0.42A/B four-stage Graph-SFT, 3,355-QA predicted-context rollout and exact same-ID audits; retain **MoL-700**.
 - [ ] Resume the API audit after quota recovery; publish a final score only at 3,355/3,355 coverage with complete DriveLM-DS evaluation.
 
 ### Earlier v0.31 reproduction baseline
