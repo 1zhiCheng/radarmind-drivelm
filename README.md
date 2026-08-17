@@ -223,6 +223,27 @@ Neither RL candidate is promoted; MoL-700 remains the system baseline. See the
 [reproduction scripts](reproduction/qwen_vl_v040_trajectory_rl/) and
 [machine-readable full-system result](results/v040/full_system_summary.json).
 
+### v0.41 Qwen3.8-Max API zero-shot audit (partial)
+
+The same six-camera prompts were evaluated with `qwen3.8-max` at temperature
+zero. The provider quota stopped the run at **764/3,355 QA (22.77% coverage)**,
+so this partial audit is excluded from the complete leaderboard and does not
+claim a DriveLM-DS Final score.
+
+| Model on the same 764 IDs | EM | Token-F1 | ROUGE-L | MC accuracy |
+| --- | ---: | ---: | ---: | ---: |
+| Raw Qwen2.5-VL-7B | 11.2565% | 21.8378% | 19.2737% | 44.1026% |
+| **Qwen3.8-Max API zero-shot** | **15.9686%** | **29.7763%** | **26.0661%** | **62.5641%** |
+| B10 CE-LoRA | 43.4555% | 73.7279% | 71.6917% | 85.1282% |
+| MoL-700 | 43.5864% | 74.9443% | 72.6615% | 84.6154% |
+
+Qwen3.8-Max improves over the raw local VLM but remains far below the
+DriveLM-domain SFT/MoL models, especially on Prediction and Planning. See the
+[partial report](docs/current/VERSION_0_41_QWEN38MAX_API_ZERO_SHOT.md),
+[resumable script](reproduction/qwen_api_v041/infer_api.py),
+[machine-readable metrics](results/v041/qwen38max_partial_764.json), and
+[764 prediction records](results/v041/qwen38max_dev_predictions_764.jsonl).
+
 ## Project status and TODO
 
 Active route: single-frame six-camera DriveLM-nuScenes, with v0.39B MoL step 700 retained as the promoted full-system baseline; GSPO-90 is preserved as the Planning-only trajectory winner and a controlled negative full-system result.
@@ -246,6 +267,8 @@ Active route: single-frame six-camera DriveLM-nuScenes, with v0.39B MoL step 700
 - [x] Train shared-LoRA and four-expert MoL controls; confirm the MoL pilot passes full and same-ID gates.
 - [x] Run adaptive v0.39B checkpoint search through step 900 and promote **step 700: Final 0.608245**.
 - [x] Complete GRPO/GSPO Planning-only and 3,355-QA full-system evaluation; retain **MoL-700** after both RL candidates fail the Final/same-ID gates.
+- [x] Record a strict same-ID 764-QA `qwen3.8-max` API audit without mixing partial results into the full leaderboard.
+- [ ] Resume the API audit after quota recovery; publish a final score only at 3,355/3,355 coverage with complete DriveLM-DS evaluation.
 
 ### Earlier v0.31 reproduction baseline
 

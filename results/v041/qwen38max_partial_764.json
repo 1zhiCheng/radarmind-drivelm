@@ -1,0 +1,87 @@
+{
+  "schema_version": "radarmind-drivelm-v041-qwen38max-partial-v1",
+  "status": "partial_quota_exhausted",
+  "model": "qwen3.8-max",
+  "protocol": {
+    "input": "single-frame six-camera DriveLM-nuScenes",
+    "dev_total": 3355,
+    "completed": 764,
+    "coverage": 0.2277198211624441,
+    "temperature": 0.0,
+    "max_image_pixels_per_camera": 100352,
+    "thinking_mode": "provider default",
+    "scope": "local scene-isolated dev; not the hidden challenge score"
+  },
+  "offline_metrics": {
+    "overall": {
+      "count": 764,
+      "exact_match": 0.15968586387434555,
+      "token_f1": 0.2977625082685874,
+      "rouge_l": 0.26066086261742527
+    },
+    "multiple_choice": {
+      "count": 195,
+      "accuracy": 0.6256410256410256
+    },
+    "by_task": {
+      "perception": {
+        "count": 199,
+        "exact_match": 0.40703517587939697,
+        "token_f1": 0.5731386725866229,
+        "rouge_l": 0.5172928117744062
+      },
+      "prediction": {
+        "count": 130,
+        "exact_match": 0.0,
+        "token_f1": 0.06219065532970022,
+        "rouge_l": 0.04491005486646493
+      },
+      "planning": {
+        "count": 329,
+        "exact_match": 0.0,
+        "token_f1": 0.19559627744559815,
+        "rouge_l": 0.15004657253485001
+      },
+      "behavior": {
+        "count": 106,
+        "exact_match": 0.3867924528301887,
+        "token_f1": 0.3867924528301887,
+        "rouge_l": 0.3867924528301887
+      }
+    }
+  },
+  "same_id_comparison": {
+    "raw_qwen25vl_7b": {
+      "exact_match": 0.112565445026178,
+      "token_f1": 0.21837807460453731,
+      "rouge_l": 0.1927372729623142,
+      "multiple_choice_accuracy": 0.441025641025641
+    },
+    "qwen38max_api": {
+      "exact_match": 0.15968586387434555,
+      "token_f1": 0.2977625082685874,
+      "rouge_l": 0.26066086261742527,
+      "multiple_choice_accuracy": 0.6256410256410256
+    },
+    "b10_sft": {
+      "exact_match": 0.43455497382198954,
+      "token_f1": 0.7372788504926221,
+      "rouge_l": 0.7169171603758951,
+      "multiple_choice_accuracy": 0.8512820512820513
+    },
+    "mol700": {
+      "exact_match": 0.43586387434554974,
+      "token_f1": 0.7494427617793777,
+      "rouge_l": 0.7266148901338424,
+      "multiple_choice_accuracy": 0.8461538461538461
+    }
+  },
+  "full_dev_projection": {
+    "method": "full raw score plus the qwen3.8-max minus raw delta on the same 764 IDs",
+    "not_an_observed_score": true,
+    "exact_match": 0.1842292116946513,
+    "token_f1": 0.3217244535194583,
+    "rouge_l": 0.2852999343569325,
+    "multiple_choice_accuracy": 0.7014693171956822
+  }
+}
