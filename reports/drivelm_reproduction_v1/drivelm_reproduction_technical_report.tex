@@ -1,8 +1,10 @@
 \documentclass[UTF8,a4paper,11pt]{ctexart}
-\usepackage[a4paper,margin=2.15cm,headheight=16pt]{geometry}
-\usepackage{graphicx,booktabs,tabularx,longtable,array,amsmath,amssymb}
+\usepackage[a4paper,margin=2.0cm,headheight=16pt]{geometry}
+\usepackage{graphicx,booktabs,tabularx,longtable,array,amsmath,amssymb,multirow}
 \usepackage[table]{xcolor}
 \usepackage{hyperref,fancyhdr,titlesec,enumitem,float,caption,subcaption,listings,microtype,setspace,seqsplit}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,backgrounds}
 \setCJKmainfont{Noto Serif CJK SC}
 \setCJKsansfont{Noto Sans CJK SC}
 \setmainfont{TeX Gyre Pagella}
@@ -14,23 +16,30 @@
 \definecolor{RadarNavy}{HTML}{102039}
 \definecolor{RadarOrange}{HTML}{FF9D42}
 \definecolor{RadarRed}{HTML}{E65362}
+\definecolor{RadarGreen}{HTML}{159F72}
 \definecolor{LightBlue}{HTML}{EEF4FF}
+\definecolor{LightGreen}{HTML}{EAF8F2}
+\definecolor{LightOrange}{HTML}{FFF3E8}
 \definecolor{LightGray}{HTML}{F5F7FA}
 
 \hypersetup{
   colorlinks=true,linkcolor=RadarBlue,urlcolor=RadarBlue,citecolor=RadarCyan,
-  pdftitle={DriveLM-nuScenes 六视角 VLM 复现技术报告},
+  pdftitle={RadarMind-DriveLM 六视角 Graph-VLM 技术演进报告},
   pdfauthor={RadarMind Project / 张宗元}
 }
 \graphicspath{{assets/}}
 \captionsetup{font=small,labelfont=bf}
 \setlength{\parindent}{2em}
-\setlength{\parskip}{0.35em}
+\setlength{\parskip}{0.32em}
+\setlength{\emergencystretch}{2em}
 \setlist{nosep,leftmargin=2em}
 \renewcommand{\arraystretch}{1.18}
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{C}{>{\centering\arraybackslash}X}
 \newcommand{\code}[1]{\texttt{\small #1}}
 \newcommand{\metric}[1]{\textbf{\color{RadarBlue}#1}}
+\newcommand{\winner}{\textbf{\color{RadarGreen}晋级}}
+\newcommand{\reject}{\textbf{\color{RadarRed}未晋级}}
 \titleformat{\section}{\Large\bfseries\sffamily\color{RadarNavy}}{\thesection}{0.65em}{}
 \titleformat{\subsection}{\large\bfseries\sffamily\color{RadarBlue}}{\thesubsection}{0.55em}{}
 \titleformat{\subsubsection}{\normalsize\bfseries\sffamily\color{RadarNavy}}{\thesubsubsection}{0.5em}{}
@@ -38,8 +47,8 @@
 \titlespacing*{\subsection}{0pt}{1.0em}{0.4em}
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[L]{\small\sffamily RadarMind × DriveLM}
-\fancyhead[R]{\small\sffamily 六视角 VLM 复现技术报告}
+\fancyhead[L]{\small\sffamily RadarMind $\times$ DriveLM}
+\fancyhead[R]{\small\sffamily Graph-VLM 技术演进报告 v2.0}
 \fancyfoot[C]{\thepage}
 \renewcommand{\headrulewidth}{0.4pt}
 \lstdefinestyle{code}{
@@ -53,419 +62,455 @@
 \begin{document}
 \begin{titlepage}
   \pagecolor{RadarNavy}\color{white}
-  \vspace*{1.3cm}
+  \vspace*{1.0cm}
   {\sffamily\Large RadarMind Project\par}
   \vspace{0.35cm}
   {\noindent\color{RadarCyan}\rule{\textwidth}{2pt}\par}
-  \vspace{1.5cm}
+  \vspace{1.25cm}
   {\sffamily\bfseries\fontsize{28}{36}\selectfont
-  DriveLM-nuScenes\\[0.20em]六视角 VLM 复现技术报告\par}
-  \vspace{0.8cm}
-  {\sffamily\fontsize{18}{25}\selectfont
-  基于 Qwen2.5-VL-3B 与 LoRA 的\\
-  感知—预测—规划图视觉问答基线\par}
+  RadarMind-DriveLM\\[0.20em]六视角 Graph-VLM 技术演进报告\par}
+  \vspace{0.75cm}
+  {\sffamily\fontsize{17}{25}\selectfont
+  从零样本基模、垂域 SFT、DPO、Mixture of LoRA、\\
+  Trajectory RL 到 Graph 专家路由的完整可复现链路\par}
   \vfill
   \begin{tabular}{ll}
-    报告版本：& v1.0\\
-    项目复现：& 张宗元\\
-    生成日期：& 2026-08-07\\
-    代码目录：& \texttt{/home/zhangzongyuan/Myproject/drivelm/DriveLM-main}\\
+    报告版本：& v2.0（覆盖项目 v0.31--v0.44）\\
+    项目作者：& 张宗元\\
+    更新日期：& 2026-08-18\\
+    发布仓库：& \texttt{radarmind-drivelm}\\
+    当前基线：& v0.43 Graph anchor + MoL downstream\\
   \end{tabular}
-  \vspace{1.1cm}
+  \vspace{1.0cm}
 
-  {\small 本报告中的数值来自本地可复核 JSON、训练日志与模型配置。\\
-  3,355 条指标是场景隔离的有标签开发集离线结果，不是官方隐藏测试服务器成绩。\par}
+  {\small 本报告只使用可由本地 JSON、日志、checkpoint 与代码复核的结果。\\
+  3,355 条指标来自 scene-isolated local dev；语义裁判为 DeepSeek-V4-Flash 代理，\\
+  不是官方隐藏服务器的 ChatGPT 分数。\par}
 \end{titlepage}
 \nopagecolor\color{black}
 
 \begin{abstract}
-本报告记录 DriveLM-nuScenes v1.1 六视角视觉语言模型的完整复现过程。原始 DriveLM 项目以 Graph Visual Question Answering（GVQA）表达自动驾驶中的感知、预测和规划推理，但论文模型与挑战基线依赖的部分权重和训练实现并未形成可直接在当前服务器运行的现代开源流水线。本项目保留官方数据抽取逻辑、六相机输入、QA 标识与提交格式，使用 Qwen2.5-VL-3B-Instruct 作为基础模型，对注意力层和 MLP 投影层实施 LoRA 监督微调。
+本报告总结 RadarMind-DriveLM 从最初数据复现到完整 Graph-VLM Agent 的技术演进。项目以 DriveLM-nuScenes v1.1 为数据基础，将单帧六路同步相机图像组织为 26,095 条训练 QA 与 3,355 条场景隔离开发集 QA，覆盖 Perception、Prediction、Planning、Behavior 四类任务。模型主线由 Qwen2.5-VL-7B-Instruct 出发，依次完成纯交叉熵 LoRA SFT、任务均衡且带 CE anchor 的保守 DPO、四任务 Mixture of LoRA（MoL）、Planning trajectory GRPO/GSPO、四阶段 Graph trajectory SFT，以及受 InternVL4Drive 启发的固定专家路由。
 
-数据由 696 个有标签场景按 scene token 的 SHA-256 哈希确定性拆分为 619 个训练场景和 77 个开发场景，分别包含 26,095 与 3,355 条问答；官方无标签 val 包含 149 个场景、15,480 条问题。模型完成 6,524 次更新，最终 LoRA 可训练参数为 18,576,384，占总参数的 0.4923\%。开发集 3,355 条回答全部生成并匹配，离线 Overall Exact Match、Token-F1 与 ROUGE-L 分别为 44.26\%、73.33\% 和 71.59\%，多选准确率为 81.46\%。结果显示模型对二元推理和运动状态判断表现较好，但规划、精确对象 ID 接地和长链关注图仍是主要瓶颈。
+零样本基模的本地 DriveLM-DS Final 为 0.257961；六相机垂域 CE-SFT 提升到 0.594636；保守 DPO 提升到 0.596356；四专家 MoL 提升到 0.608245。GRPO/GSPO 在 Planning 子协议上改善 trajectory reward，但接回完整系统后未超过 MoL。Graph-SFT 显著改善坐标 grounding，却因 teacher forcing 与 predicted-context 的暴露偏差未通过 same-ID 晋级门槛。最终系统把 Graph-A 只用于每帧第一个重要对象 anchor，把 MoL-700 用于其余 2,888 条下游 QA，在 3,355 条完整开发集上取得 0.612293；严格 1,848-ID 共同子集 Final 同样由 0.609563 提升到 0.610557。因此 v0.43 是当前本地全系统基线。
+
+报告同时保留具有方法论价值的负实验：增加视觉 token、标准 DPO、grounding DPO、全系统 GRPO/GSPO、Graph+anchor 混合训练、显式六相机拓扑提示和 image-only bbox 辅助监督均未通过冻结晋级门槛。这些结果共同说明：DriveLM 的主要困难不是单一语言指标，而是 graph gating、对象召回、任务梯度冲突和上游误差传播；可靠模型选择必须结合完整 Final、predicted-context rollout 与 same-ID 公平审计。
 \end{abstract}
 
 \tableofcontents
 \clearpage
 
-\section{结论先行：测试指标究竟如何得到}
-本项目报告的“测试指标”更准确地说是\textbf{本地场景隔离开发集指标}。计算链路如下：
-\begin{enumerate}
-  \item 从带答案的 \path{v1_1_train_nus.json} 经 DriveLM challenge 官方脚本抽取基础 QA。
-  \item 对每个 scene token 计算 SHA-256 哈希；哈希桶小于 0.1 的整个场景进入 dev，其余进入 train。同一场景不会同时出现在两侧。
-  \item 得到 619 个训练场景、26,095 条训练 QA，以及 77 个未参与 SFT 的开发场景、3,355 条开发 QA。
-  \item 使用最终 LoRA adapter 对 \path{qwen_dev.jsonl} 的六张同步相机图像逐条生成答案，输出 \path{dev_predictions.json}。
-  \item 以唯一 ID 对齐预测和参考答案。3,355 个参考 ID 全部匹配，coverage 为 100\%。
-  \item 运行 \path{evaluate_offline.py}，逐样本计算规范化 Exact Match、Token-F1、ROUGE-L，再对 Overall 和各 task 取算术平均；A/B/C/D 问题另算准确率。
-\end{enumerate}
+\section{项目目标与最终系统}
+\subsection{问题定义}
+DriveLM 将自动驾驶推理表示为 Graph Visual Question Answering（Graph-VQA）。模型不仅需要描述场景，还要围绕关键对象完成四类任务：
+\begin{itemize}
+  \item \textbf{Perception：}识别影响驾驶决策的车辆、行人、骑行者和交通元素，并判断对象状态；
+  \item \textbf{Prediction：}推断对象类别、运动趋势与自车未来位置需要关注的对象；
+  \item \textbf{Planning：}生成候选动作、碰撞风险动作与安全动作；
+  \item \textbf{Behavior：}从选项中判断自车速度与转向组合。
+\end{itemize}
+项目目标不是把每条 QA 独立做成普通图文问答，而是构建能够沿
+\(
+\small\text{Perception}\rightarrow\text{Prediction}\rightarrow\text{Planning}\rightarrow\text{Behavior}
+\)
+传播工作记忆的感知决策 Agent，并用接近官方结构的指标验证其完整系统性能。
+
+\subsection{当前部署结构}
+最终 v0.43 没有同时加载四个完整 VLM。系统共享一个 7B 基座，在推理时挂载任务适配器，并使用固定、无答案依赖的路由：每帧 \code{qa\_index=0} 的 important-object anchor 由 Graph-A 生成，其余 QA 由 MoL-700 的任务专家生成。
 
 \begin{figure}[H]
-  \centering\includegraphics[width=\textwidth]{reproduction_pipeline.png}
-  \caption{数据构建、训练、生成与离线评估的可复现链路。}
+\centering
+\begin{tikzpicture}[scale=0.94,transform shape,
+  node distance=8mm and 8mm,
+  box/.style={draw=RadarBlue,rounded corners,fill=LightBlue,minimum height=10mm,align=center,font=\small},
+  good/.style={draw=RadarGreen,rounded corners,fill=LightGreen,minimum height=10mm,align=center,font=\small},
+  arrow/.style={-{Latex[length=2.2mm]},thick,color=RadarNavy}
+]
+\node[box] (cams) {六路同步相机\\独立图像输入};
+\node[box,right=of cams] (base) {Qwen2.5-VL-7B\\共享基座};
+\node[good,right=of base,yshift=10mm] (anchor) {Graph-A adapter\\467 条 frame anchor};
+\node[good,right=of base,yshift=-10mm] (mol) {MoL-700\\2,888 条下游 QA};
+\node[box,right=of anchor,xshift=7mm] (gate) {Graph gating\\对象坐标匹配};
+\node[box,right=of mol,xshift=7mm] (tasks) {Prediction / Planning\\Behavior / tag-3};
+\node[good,right=of gate,yshift=-10mm] (out) {DriveLM 输出\\3,355/3,355};
+\draw[arrow] (cams)--(base);
+\draw[arrow] (base)--(anchor);
+\draw[arrow] (base)--(mol);
+\draw[arrow] (anchor)--(gate);
+\draw[arrow] (mol)--(tasks);
+\draw[arrow] (gate)--(out);
+\draw[arrow] (tasks)--(out);
+\end{tikzpicture}
+\caption{当前 v0.43 系统：共享基座、固定 anchor 专家与任务 LoRA 专家。路由规则不读取参考答案、候选文本或 dev 得分。}
 \end{figure}
 
-\noindent\colorbox{LightBlue}{\parbox{\dimexpr\textwidth-2\fboxsep\relax}{
-\textbf{边界说明：}官方 val 的 15,480 条问题没有公开参考答案。本项目已生成格式完整的官方 val 输出，但不能在本地计算其 challenge 分数。因此，后文所有有数值的性能表均来自上述 77-scene dev；两条连续视频使用 train split 场景，只用于定性演示，不参与泛化指标。}}
-\vspace{0.6em}
+\noindent\colorbox{LightGreen}{\parbox{\dimexpr\textwidth-2\fboxsep\relax}{
+\textbf{最终结论：}完整 3,355-QA Final 为 \metric{0.612293}；相对 MoL-700 的 0.608245 绝对提升 0.004048。严格 1,848-ID 共同子集 Final 仍提升 0.000993，因此不是 graph gating 改变题目集合造成的虚假增益。}}
 
-\section{研究背景与复现目标}
-\subsection{DriveLM 与 Graph VQA}
-DriveLM 将自动驾驶理解组织为图视觉问答：由重要对象识别开始，沿对象状态、未来关注关系、碰撞风险和安全动作形成依赖链。与单一检测或分割任务相比，这一表示能够同时考察：
-\begin{itemize}
-  \item \textbf{Perception：}识别对当前决策重要的车辆、行人和交通元素，并给出对象状态；
-  \item \textbf{Prediction：}判断对象类别或状态，并按照自车下一位置给出有序关注对象；
-  \item \textbf{Planning：}回答候选动作、碰撞动作与安全动作；
-  \item \textbf{Behavior：}从多选项预测自车转向和速度行为。
-\end{itemize}
-DriveLM 数据建立在 nuScenes 与 CARLA 等自动驾驶数据之上。本报告聚焦 DriveLM-nuScenes v1.1 的纯视觉六相机复现，不把尚未接入本轮 SFT 的 nuScenes radar 数据计入模型输入。
-
-\subsection{为什么采用 Qwen2.5-VL}
-原论文使用 BLIP-2 路线，challenge 发布的历史基线依赖受限的 LLaMA-1 权重与旧版适配器。为获得可下载、可训练、可部署的现代基线，本项目采用 Qwen2.5-VL-3B-Instruct：
-\begin{itemize}
-  \item 原生支持多图输入，可把六个同步相机视角作为独立视觉输入；
-  \item 3B 量级适合单张 48\,GB A6000 或 32\,GB 级 GPU 上进行 LoRA 微调；
-  \item 具有统一图像—文本对话模板，可直接生成自由文本和 A/B/C/D 答案；
-  \item PEFT/LoRA 训练只更新不足 0.5\% 的参数，便于快速迭代和保存 checkpoint。
-\end{itemize}
-
-\subsection{复现目标与非目标}
-本轮目标是打通并实测：
-\[
-\text{DriveLM 标注}\rightarrow\text{六相机 JSONL}\rightarrow
-\text{LoRA SFT}\rightarrow\text{dev 生成}\rightarrow
-\text{离线评估}\rightarrow\text{official val 输出}.
-\]
-本轮不声称逐参数复现论文 BLIP-2，也不声称获得官方 challenge 排名；未进行 camera-only 与 radar-fusion 的受控消融，亦没有多随机种子统计。
-
-\section{数据方案与训练样本构建}
-\subsection{数据来源与目录}
-核心输入为 DriveLM-nuScenes v1.1 训练标注、无答案 val 问题和六相机图像。当前服务器主要路径为：
-\begin{lstlisting}
-/mnt/data/zzy/drivelm/data/QA_dataset_nus/
-  v1_1_train_nus.json
-  v1_1_val_nus_q_only.json
-/mnt/data/zzy/drivelm/data/nuscenes/samples/CAM_*/
-/mnt/data/zzy/drivelm/reproduction/qwen_vl/
-  qwen_train.jsonl
-  qwen_dev.jsonl
-  qwen_val_questions.jsonl
-\end{lstlisting}
-数据构建共检查 29,226 张唯一相机图像，缺失为 0。固定视角顺序为：
+\section{数据、拆分与训练输入}
+\subsection{数据来源}
+训练标注来自 DriveLM-nuScenes v1.1，视觉输入为同一关键帧的六路相机：
 \begin{center}\small
 CAM\_FRONT、CAM\_FRONT\_LEFT、CAM\_FRONT\_RIGHT；\\
 CAM\_BACK、CAM\_BACK\_LEFT、CAM\_BACK\_RIGHT。
 \end{center}
+项目保留六图独立输入，不把六相机强制拼成单张 mosaic。这样可避免额外缩放、视角边界和单图动态切片造成的信息损失。
 
-\subsection{确定性场景级拆分}
-拆分函数为：
+\begin{figure}[H]
+  \centering\includegraphics[width=0.94\textwidth]{six_camera_input.jpg}
+  \caption{同一关键帧的六路同步图像。训练和推理中的相机顺序固定。}
+\end{figure}
+
+\subsection{场景级隔离拆分}
+对 scene token 计算 SHA-256 哈希桶：
 \[
-b(s)=\frac{\mathrm{int}(\mathrm{SHA256}(s)_{0:8},16)}{2^{32}-1}.
+b(s)=\frac{\operatorname{int}(\operatorname{SHA256}(s)_{0:8},16)}{2^{32}-1}.
 \]
-若 $b(s)<0.1$，scene $s$ 进入 dev；否则进入 train。该策略避免同一约 20 秒场景的相邻关键帧泄漏到训练集和开发集。随机种子 42 主要用于保持官方多选项抽取与转换结果可重复。
+当 \(b(s)<0.1\) 时整个场景进入 dev，否则进入 train。同一约 20 秒场景的相邻关键帧不会跨越训练和开发集。
 
 \begin{table}[H]
 \centering
-\caption{数据划分实测统计。}
+\caption{当前主线数据规模。}
 \begin{tabular}{lrrrr}
 \toprule
-划分 & 场景数 & QA 数 & 是否有答案 & 用途\\
+划分 & 场景数 & Frame trajectory & QA 数 & 用途\\
 \midrule
-Train & 619 & 26,095 & 是 & LoRA SFT\\
-Local dev & 77 & 3,355 & 是 & 本地离线评估\\
-Official val & 149 & 15,480 & 否 & challenge 提交生成\\
+Train & 619 & 3,605 & 26,095 & SFT / DPO / MoL / Graph\\
+Local dev & 77 & 467 & 3,355 & 本地生成、筛选与公平审计\\
+Official val & 149 & -- & 15,480 & 无答案提交集\\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \begin{figure}[H]
-  \centering\includegraphics[width=\textwidth]{dataset_task_distribution.png}
-  \caption{各划分中 perception、prediction、planning、behavior 的数量。}
+  \centering\includegraphics[width=0.94\textwidth]{dataset_task_distribution.png}
+  \caption{训练、开发和官方 val 中四类任务的数量分布。}
 \end{figure}
 
-\subsection{JSONL 样本结构}
-每条训练记录包含 scene ID、frame ID、QA 索引、任务类型、六张相机绝对路径和 system/user/assistant 消息。system prompt 要求模型分析全部六视角、准确简洁作答并避免臆造。训练时只监督 assistant 答案 token；system、图像 prompt 与 user 问题的 label 置为 $-100$。
-
-\begin{figure}[H]
-  \centering\includegraphics[width=\textwidth]{six_camera_input.jpg}
-  \caption{场景隔离 dev 中一条样本的六个同步相机视角。模型训练与推理均接收六图。}
-\end{figure}
-
-\section{模型与微调方案}
-\subsection{基础模型结构}
-本地模型配置显示，Qwen2.5-VL-3B 使用 32 层视觉编码器，视觉 hidden size 为 1280，patch size 为 14，spatial merge size 为 2；视觉输出映射到 2048 维。语言模型包含 36 层、hidden size 2048、16 个 attention heads 和 2 个 key/value heads，最大位置长度为 128K。
-
-每张图设置最大 75,264 pixels，即 $96\times28\times28$；这是一项显存预算上限，实际视觉 token 数随缩放后的图像尺寸变化。六视角在 processor 中保持为六个独立图像输入。
-
-\begin{figure}[H]
-  \centering\includegraphics[width=\textwidth]{model_architecture.png}
-  \caption{六视角 Qwen2.5-VL-3B LoRA 模型结构与训练位置。}
-\end{figure}
-
-\subsection{LoRA 注入}
-LoRA rank $r=8$，缩放系数 $\alpha=16$，dropout 为 0.05，bias 不训练。注入模块为：
+\subsection{JSONL 与监督边界}
+每条独立 QA 样本包含 scene ID、frame ID、QA index、任务类型、六图路径和 system/user/assistant 消息。CE-SFT 只监督 assistant token，图像、system 和 user token 的 label 为 \(-100\)：
 \[
-\{q,k,v,o\}_{\mathrm{proj}}\cup
-\{\mathrm{gate},\mathrm{up},\mathrm{down}\}_{\mathrm{proj}}.
+\mathcal L_{\mathrm{CE}}
+=-\sum_{t\in\mathrm{assistant}}
+\log p_\theta(y_t\mid I_{1:6},q,y_{<t}).
 \]
-可训练参数 18,576,384，总参数 3,773,199,360，占比 0.4923\%。最终 adapter 权重约 74.4\,MB，显著小于基础模型。
+Graph-SFT 将同一帧的全部 QA 打包为多轮 trajectory；六张图只在首节点输入，后续节点读取上游 assistant 消息作为显式工作记忆。
 
-\section{训练配置与执行过程}
-\begin{table}[H]
-\centering
-\caption{最终 SFT 主要配置。}
-\begin{tabularx}{\textwidth}{lY}
-\toprule
-配置项 & 实际值\\
-\midrule
-Base model & Qwen2.5-VL-3B-Instruct，BF16\\
-训练样本 & 26,095 条，六相机输入\\
-Optimizer & AdamW\\
-Learning rate / weight decay & $2\times10^{-4}$ / 0\\
-Batch / gradient accumulation & 4 / 1，有效 batch 4\\
-最大文本长度 & 2,048 tokens\\
-每图视觉预算 & min 25,088，max 75,264 pixels\\
-Gradient checkpointing & 开启\\
-Gradient clipping & max norm 1.0\\
-LoRA & $r=8,\alpha=16,$ dropout 0.05\\
-更新步数 & 6,524\\
-Checkpoint & 每 500 步保存\\
-Random seed & 42\\
-\bottomrule
-\end{tabularx}
-\end{table}
+\section{统一评测协议}
+\subsection{为什么不能只看 Token-F1}
+DriveLM 同时包含短分类答案、自由文本规划、对象坐标和图依赖。单一 lexical 指标无法反映：对象识别错误是否导致后续问题被 gating、同义规划是否语义正确、坐标是否匹配，以及模型是否只在较容易的有效子集上得分。因此主线同时报告离线 lexical 指标、结构指标、语义裁判和完整 Final。
 
-训练在第 3,000 步因终端会话退出而中断，随后从 \path{checkpoint-3000} 恢复到第 6,524 步。LoRA 参数连续，但训练脚本的 checkpoint 只保存 adapter，没有保存 AdamW optimizer state；因此恢复段的动量重新初始化。
-
-可审计的恢复段共 3,524 次更新，耗时 15,108.78 秒（约 4.20 小时），平均约 4.29 秒/更新。训练报告中的最终 \code{mean\_update\_loss\_this\_run}=0.341855。
-
-\begin{figure}[H]
-  \centering\includegraphics[width=0.92\textwidth]{continuation_mean_loss.png}
-  \caption{第 3,001--6,524 步恢复段的累计平均 loss。日志未保存第 1--3,000 步逐步 loss，且该曲线不是瞬时 mini-batch loss。}
-\end{figure}
-
-\section{推理与评估方法}
-\subsection{开发集生成}
-最终 adapter 对 \path{qwen_dev.jsonl} 全量生成。processor 使用与训练一致的六图顺序和像素预算；decoder 采用确定性生成（\code{do\_sample=False}），最多生成 256 个新 token。多选题若输出以 A--D 开头，则规范化为单个大写字母。最终 reference、prediction 和 matched ID 均为 3,355，coverage 为 100\%。
-
-\subsection{文本规范化}
-评价前把预测与参考答案转为小写，去除非英文字母/数字字符，并把连续空白压缩为单空格：
+\subsection{本地 DriveLM-DS}
+本地 evaluator 沿用公开 challenge 的指标结构：
 \[
-N(x)=\mathrm{collapse}\bigl(\mathrm{regex}_{[^a-z0-9]}(
-\mathrm{lower}(\mathrm{strip}(x)))\bigr).
+S_{\mathrm{Final}}
+=0.4S_{\mathrm{semantic}}
++0.2S_{\mathrm{language}}
++0.2S_{\mathrm{match}}
++0.2S_{\mathrm{accuracy}}.
 \]
-该规范化会忽略大小写和标点差异，但不会处理同义词。例如“decelerate”与“slow down”仍被视为不同 token。
+其中 semantic 使用 DeepSeek-V4-Flash、temperature 0，作为官方 ChatGPT Score 的本地代理；Language 由 BLEU-1--4、ROUGE-L 和 CIDEr 合成；Match 衡量重要对象与坐标结构；Accuracy 处理分类式问题。所有可比较候选要求 3,355/3,355 coverage 和 Judge completion 100\%。
 
-\subsection{Exact Match}
+\subsection{Graph gating 与 same-ID 公平审计}
+每帧首个 important-object 回答决定哪些下游 QA 满足坐标 gating。两个模型可能拥有不同的 eligible 集合，直接比较 Full Final 会把“模型能力变化”和“题目集合变化”混在一起。项目因此固定执行：
 \[
-\mathrm{EM}(p,r)=\mathbb{I}\left[N(p)=N(r)\right].
+\mathcal I_{\mathrm{pair}}
+=\mathcal I_{\mathrm{baseline}}\cap\mathcal I_{\mathrm{candidate}}.
 \]
-长答案只要对象顺序、类别或措辞不同，就可能 EM 为 0，因此 EM 对 important-object 和 notice-graph 尤其严格。
+双方只在 \(\mathcal I_{\mathrm{pair}}\) 上重新计算指标，并要求 Final 严格提高，Planning、MC 与 coordinate F1 不超过预注册回退阈值。
 
-\subsection{Token-F1}
-将规范化文本按空格分词，并按词频多重集计算重叠数 $o$：
+\subsection{Predicted-context rollout}
+Teacher-forced dev NLL 只回答“给定正确上游答案时，模型能否预测当前答案”。真实 Agent 没有 gold context，因此最终 Graph 评测必须执行：
 \[
-P=\frac{o}{|p|},\quad R=\frac{o}{|r|},\quad F_1=\frac{2PR}{P+R}.
+\hat y_1=f(I,q_1),\quad
+\hat y_t=f(I,q_{1:t},\hat y_{1:t-1}).
 \]
-每条样本计算后，在 Overall 或任务组内取算术平均。这不是把全部 token 汇总后的 micro-F1。
+即把模型自己的 Perception/Prediction 输出继续输入 Planning/Behavior。该协议显式测量上游错误传播与 exposure mismatch；dev NLL 仅用于低成本 checkpoint screening，不用于最终晋级。
 
-\subsection{ROUGE-L}
-对预测 token 序列与参考 token 序列求最长公共子序列长度 $L$：
+\section{技术演进与理论依据}
+\subsection{阶段 0：零样本基模}
+Qwen2.5-VL-7B-Instruct 原生支持多图，但未经 DriveLM 模板、对象 ID、坐标和规划语言适配。零样本 Final 仅 0.257961，说明通用视觉语言能力不能直接替代垂域格式与决策知识。该结果为后续所有改进提供冻结起点。
+
+\subsection{阶段 1：六相机纯 CE-LoRA SFT}
+首个稳定 7B 主线采用单帧六图、assistant-token-only CE 和 LoRA。LoRA rank 8、\(\alpha=16\)、dropout 0.05，目标模块包括注意力投影与 MLP 投影；adapter 包含视觉和语言两部分参数。在当前 7B 配置中，可训练参数 23,794,688，占 8,315,961,344 总参数的约 0.286\%。
+
+纯 CE 的理论作用是最大化垂域答案似然，不把 dev Final、judge 或手写 metric 权重混进初始表示学习。B10 将 Final 从 0.257961 提升到 0.594636，是整个项目最大的单阶段增益，也验证“先建立强 CE 基线，再进行偏好或 RL 优化”的路线。
+
+同阶段的高视觉预算 B11 反而下降到 0.580881。更多视觉 token 增加了计算量，却没有自动改善对象召回，说明瓶颈不仅是分辨率，还包括监督对齐、任务干扰与坐标格式。
+
+\subsection{阶段 2：CE 锚定的保守 DPO}
+标准 DPO 使用 7,149 组候选偏好对，优化 chosen 相对 rejected 的优势：
 \[
-P_L=\frac{L}{|p|},\quad R_L=\frac{L}{|r|},\quad
-\mathrm{ROUGE\mbox{-}L}_{F1}=\frac{2P_LR_L}{P_L+R_L}.
+\mathcal L_{\mathrm{DPO}}
+=-\log\sigma\!\left(
+\beta\left[
+\log\frac{\pi_\theta(y^+\mid x)}{\pi_{\mathrm{ref}}(y^+\mid x)}
+-\log\frac{\pi_\theta(y^-\mid x)}{\pi_{\mathrm{ref}}(y^-\mid x)}
+\right]\right).
 \]
-本实现是无外部依赖的 LCS-F1，不包含 stemming 或同义词扩展。
+标准 DPO-100 虽提高部分 lexical 与 MC 指标，但 Planning/judge 回退，Final 为 0.594300。问题表现为偏好分布不均和更新过强，而非 adapter 容量不足。
 
-\subsection{多选与对象结构指标}
-参考答案规范化后若为 A/B/C/D，则进入多选准确率，共 890 条。错误分析还用正则表达式抽取 \code{<cN,CAM\_*,...>} 中的对象序号与相机名，忽略坐标，累计计算结构 precision、recall 和 F1。该指标只衡量简化的对象 ID/视角绑定，不等价于检测框 AP。
+保守 DPO 将四任务偏好均衡，使用较小 \(\beta=0.05\)，并加入 chosen-answer CE anchor：
+\[
+\mathcal L=\mathcal L_{\mathrm{DPO}}+\lambda\mathcal L_{\mathrm{CE}}(y^+),
+\qquad \lambda=0.1.
+\]
+CE anchor 相当于对原语言建模能力施加软约束，降低 preference over-optimization。checkpoint-75 的 Final 达到 0.596356；1,807-ID same-ID Final 同样提高 0.001056，因此正式晋级。
 
-\section{实验结果}
-\subsection{分任务主结果}
-\begin{table}[H]
-\centering
-\caption{场景隔离开发集离线结果。}
-\begin{tabular}{lrrrr}
-\toprule
-任务 & 数量 & Exact Match & Token-F1 & ROUGE-L\\
-\midrule
-Overall & 3,355 & 44.26\% & 73.33\% & 71.59\%\\
-Perception & 890 & 45.51\% & 82.56\% & 78.56\%\\
-Prediction & 599 & 75.13\% & 90.41\% & 89.05\%\\
-Planning & 1,399 & 22.16\% & 61.76\% & 60.72\%\\
-Behavior & 467 & 68.52\% & 68.52\% & 68.52\%\\
-\bottomrule
-\end{tabular}
-\end{table}
+\subsection{阶段 3：Mixture of LoRA 专家分解}
+单个 adapter 同时优化四类任务时，短分类、长规划与坐标 grounding 的梯度可能方向冲突。MoL 使用一个共享 7B 基座和四个任务 LoRA：
+\[
+e=r(q)\in\{P,Pr,Pl,B\},\qquad
+h'=h+\Delta W_e h.
+\]
+路由 \(r(q)\) 只读取已知任务类型，而不是候选答案或 dev 分数，因此可部署且无答案依赖。每个专家仍用普通 CE 训练；改进来自参数子空间解耦，而不是将最终评测指标写入 loss。
 
-\begin{figure}[H]
-  \centering\includegraphics[width=\textwidth]{metrics_by_task.png}
-  \caption{Overall 与四类任务的 EM、Token-F1 和 ROUGE-L。}
-\end{figure}
+自适应 controller 每 100 step 评估 Token-F1，同时设置 Planning、MC、anchor F1 安全门槛；step 800/900 连续未超过 step 700 的最小增益，触发 patience=2 并回滚。MoL-700 将 Final 提升到 0.608245，same-ID Final 提升 0.013886，是 SFT 后最重要的结构改进。
 
-多选题 890 条，准确率为 \metric{81.46\%}。Prediction 分数最高，但需要结合问题族组成理解：其中大量样本是“是否为交通标志或路障”的二元回答；132 条长链 notice-graph 明显更困难。
+\subsection{阶段 4：Planning trajectory GRPO 与 GSPO}
+项目把冻结的 Perception/Prediction 结果组织为 Planning trajectory 上下文，对 Planning 专家进行组相对策略优化。确定性奖励为：
+\[
+R=0.40F_{1,\mathrm{token}}+0.20R_{L}
++0.25F_{1,\mathrm{action}}+0.05\mathrm{EM}
++0.05V_{\mathrm{ground}}+0.05V_{\mathrm{format}}.
+\]
+GRPO 与 GSPO 共享数据、候选数、seed、reward 和训练预算，只改变 policy loss 聚合。GSPO-90 在 Planning 子协议上取得最高 reward 61.2600，优于 MoL control 60.8118 和 GRPO-70 61.1674。
 
-\subsection{问题族诊断}
-\begin{table}[H]
-\centering
-\caption{问题族级别诊断。}
-\begin{tabular}{lrrr}
-\toprule
-问题族 & 数量 & Exact Match & Token-F1\\
-\midrule
-Binary reasoning & 467 & 96.36\% & 96.36\%\\
-Moving-status MC & 423 & 95.74\% & 95.74\%\\
-Candidate actions & 466 & 11.59\% & 76.69\%\\
-Important objects & 467 & 0.00\% & 70.63\%\\
-Notice graph & 132 & 0.00\% & 69.34\%\\
-Safe actions & 467 & 19.06\% & 59.60\%\\
-Collision reasoning & 466 & 35.84\% & 48.98\%\\
-Behavior MC & 467 & 68.52\% & 68.52\%\\
-\bottomrule
-\end{tabular}
-\end{table}
+然而接回四任务系统后，GRPO/GSPO Final 分别为 0.606702/0.606640，均低于 MoL-700。理论原因是局部 reward 优化与 graph-eligible Final 不完全一致；一个策略可以改善全体 Planning trajectory，却在官方 gating 后的 Planning 子集上退化。该实验说明 RL 的 reward 必须与最终部署分布和系统级晋级门槛联合验证。
 
-\begin{figure}[H]
-  \centering\includegraphics[width=0.94\textwidth]{question_family_f1.png}
-  \caption{各问题族 Token-F1。碰撞推理、安全动作和长结构接地是主要短板。}
-\end{figure}
+\subsection{阶段 5：四阶段 Graph trajectory SFT}
+Graph-SFT 将同一帧的全部节点打包为一条因果对话，所有 assistant span 计算 CE。下游 token loss 通过共享 attention 更新模型参数，使模型学习跨任务上下文；但离散上游文本本身不可微，不能把 Planning 的 token loss直接“反传成正确的 Perception 答案”。
 
-\subsection{对象 ID 接地}
-简化对象结构累计统计为：true positive 810、预测对象键 2,615、参考对象键 2,468，对应 precision 30.98\%、recall 32.82\%、F1 \metric{31.87\%}。这解释了为何 important objects 的语言 Token-F1 达 70.63\%，Exact Match 却为 0：模型往往能生成合理的场景描述，但对象编号、相机方向与精确实例绑定不稳定。
+Graph-A 将坐标 grounding 与 Match 显著提高，candidate-dependent Full Final 达到 0.609998；但在严格 1,848-ID 交集上 Final 下降 0.003428，Planning 与 MC 也下降，因此未晋级。核心问题是 teacher forcing：训练时下游看到 gold 上游答案，部署时看到模型预测，形成 exposure mismatch。Graph+CE-anchor 混合版本也未修复这一问题。
 
-\subsection{结果解读}
+\subsection{阶段 6：受 InternVL4Drive 启发的固定专家路由}
+InternVL4Drive 的可迁移洞见不是必须更换为 25.5B InternVL，而是利用互补模型：Grounding 强的模型负责感知瓶颈，推理强的模型负责下游。项目冻结路由：
+\begin{lstlisting}
+if qa_index == 0:
+    answer = Graph_A(frame_anchor)
+else:
+    answer = MoL_700(task_expert)
+\end{lstlisting}
+路由只使用输入侧节点位置，不读取答案、reference、置信度或 dev 分数。Graph-A 负责 467 条 frame anchor；MoL-700 负责 2,888 条下游 QA。该组合把“坐标召回”和“规划语言”分配给各自优势专家，避免在同一个 adapter 内折中。
+
+完整 Final 从 0.608245 提高到 0.612293；common 1,848-ID Final 从 0.609563 提高到 0.610557，全部 paired gates 通过。网络禁用的 cache-only Judge 完成 791/791 命中，保证本轮没有新增外发 payload。
+
+\subsection{阶段 7：空间提示与 bbox 辅助负实验}
+为验证 InternVL 的其他思路，v0.44 保持六张独立图输入，测试：
 \begin{enumerate}
-  \item \textbf{分类式问题较强。}二元推理与运动状态多选均超过 95\%，说明模型已学会常见问答模板与粗粒度场景状态。
-  \item \textbf{自由文本语义可用，但严格 EM 偏低。}候选动作 Token-F1 76.69\%，EM 仅 11.59\%，反映合理同义表达和参考答案模板差异。
-  \item \textbf{Planning 是当前核心瓶颈。}Planning overall Token-F1 61.76\%，碰撞推理仅 48.98\%；错误中常见“应减速或停车”与“保持速度”的混淆。
-  \item \textbf{单关键帧存在行为歧义。}Behavior 准确率 68.52\%，仅凭同步单帧难以可靠判断自车速度和转向趋势，后续需要时序帧或 ego state。
+  \item \textbf{显式相机拓扑：}在 system prompt 中声明前、后、左右视角及相机内坐标系；
+  \item \textbf{image-only bbox auxiliary：}训练时只输入原始六图，目标只输出相机名和归一化 bbox；不输入真实框、中心点、类别、状态或描述。视觉 LoRA 确实接收梯度。
+\end{enumerate}
+显式拓扑模型的 EM 与部分坐标指标略升，但 Token-F1、MC 和 eligible 数下降；接入“anchor+MoL”后仍略低于 v0.43。bbox 辅助模型的 anchor F1 降到 12.77\%，eligible 降到 1,883，Planning Token-F1 降到 57.57\%。可能原因包括辅助检测目标与 DriveLM center-point/graph 目标不一致、有限 LoRA 容量下的梯度干扰，以及“所有重要对象框”对最终语言规划并非充分统计量。两者均作为负实验保存，不调用额外语义 Judge，也不替换主线。
+
+\section{统一性能演进}
+\begin{table}[H]
+\centering
+\caption{3,355-QA 本地完整系统性能。Final 均为同一 DriveLM-DS 代理结构；\(\dagger\) 表示最终晋级。}
+\scriptsize
+\begin{tabular}{p{2.5cm}rrrrrrp{1.55cm}}
+\toprule
+模型阶段 & EM & Token-F1 & ROUGE-L & MC & Judge/100 & Final & 结论\\
+\midrule
+7B zero-shot & 13.71 & 24.23 & 21.74 & 51.69 & 36.83 & 0.257961 & control\\
+CE-LoRA B10 & 43.46 & 73.00 & 71.08 & 83.82 & 70.63 & 0.594636 & \(\dagger\)\\
+Standard DPO-100 & 43.55 & 73.17 & 71.22 & 84.27 & 69.75 & 0.594300 & 未晋级\\
+Conservative DPO-75 & 43.58 & 73.12 & 71.20 & 84.16 & 70.86 & 0.596356 & \(\dagger\)\\
+Grounding DPO-50 & -- & -- & -- & -- & 69.73 & 0.592092 & 未晋级\\
+MoL-700 & 43.99 & 74.53 & 72.41 & 84.49 & 72.48 & 0.608245 & \(\dagger\)\\
+GRPO-70 full system & 43.55 & 74.00 & 71.90 & 84.49 & 72.09 & 0.606702 & 未晋级\\
+GSPO-90 full system & 43.79 & 74.02 & 71.94 & 84.49 & 72.08 & 0.606640 & 未晋级\\
+Graph-A CE-600 & 43.04 & 73.04 & 71.00 & 83.71 & 71.30 & 0.609998 & same-ID 拒绝\\
+Graph+anchor-600 & 42.62 & 72.56 & 70.55 & 83.48 & 70.70 & 0.605430 & 未晋级\\
+\rowcolor{LightGreen}
+Graph anchor + MoL & 43.99 & 74.48 & 72.38 & 84.49 & 73.02 & \textbf{0.612293} & \textbf{当前基线}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{累计增益}
+\begin{itemize}
+  \item zero-shot \(\rightarrow\) CE-SFT：Final 绝对提升 0.336675，相对提升约 130.52\%；
+  \item CE-SFT \(\rightarrow\) conservative DPO：提升 0.001721；
+  \item conservative DPO \(\rightarrow\) MoL：提升 0.011889；
+  \item MoL \(\rightarrow\) fixed anchor ensemble：提升 0.004048；
+  \item zero-shot \(\rightarrow\) 当前系统：Final 从 0.257961 提升到 0.612293，绝对提升 0.354332。
+\end{itemize}
+
+\subsection{当前基线完整指标}
+\begin{table}[H]
+\centering
+\caption{v0.43 完整 3,355-QA 官方风格本地指标。}
+\begin{tabular}{lr@{\qquad}lr}
+\toprule
+指标 & 数值 & 指标 & 数值\\
+\midrule
+Coverage & 3,355/3,355 & Graph eligible & 1,927\\
+Accuracy & 0.813154 & Semantic Judge & 73.0197\\
+BLEU-1 & 0.789634 & BLEU-2 & 0.724770\\
+BLEU-3 & 0.665099 & BLEU-4 & 0.607520\\
+ROUGE-L & 0.724571 & CIDEr & 0.198875\\
+Match /100 & 30.7513 & Final & \textbf{0.612293}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{晋级制度与实验可信度}
+\subsection{冻结门槛}
+每个阶段在查看语义 Final 前先完成 lexical/structural screening，冻结候选选择规则。完整晋级要求：
+\begin{enumerate}
+  \item 3,355/3,355 coverage，空答案与重复 ID 为 0；
+  \item 语义 Judge complete 100\%；
+  \item Full Final 严格提高；
+  \item same-ID Final 严格提高；
+  \item Planning、MC、coordinate F1 不越过预注册回退阈值；
+  \item 训练数据不包含 dev/hidden-val 答案，路由不使用 reference 或候选得分。
+\end{enumerate}
+这套门槛解释了为什么 Graph-A 的 raw Final 0.609998 高于 MoL 0.608245，却没有直接晋级：它在共同 1,848-ID 上退化。相反，v0.43 在 full 与 paired 两种口径上均提高，因此可以成为新基线。
+
+\subsection{外部 Judge 与缓存边界}
+官方 ChatGPT evaluator 在本地不可用，项目使用 DeepSeek-V4-Flash 作为语义代理；其数值不能与官方 leaderboard 直接等同。Judge 请求以 model、base URL、prompt version、candidate、reference 和 kind 形成哈希缓存键。cache-only evaluator 以 SQLite read-only 模式工作，任一 miss 立即失败，防止未授权数据发送。
+
+\section{从正负实验得到的理论结论}
+\begin{enumerate}
+  \item \textbf{垂域 SFT 是必要条件。}通用 VLM 不熟悉 DriveLM 对象 ID、坐标、回答模板和决策语言；纯 CE 已解决大部分 domain gap。
+  \item \textbf{偏好优化需要保留语言锚。}标准 DPO 容易过优化偏好边界；任务均衡与 chosen CE anchor 能降低灾难性漂移。
+  \item \textbf{任务分解比单一共享 adapter 更有效。}MoL 的主要收益来自减少四任务之间的梯度冲突，且 hard router 比答案依赖 gate 更容易审计。
+  \item \textbf{局部 reward 提升不代表全系统提升。}GRPO/GSPO 改善 Planning trajectory，但 graph gating 后的部署分布不同；系统级 Final 必须作为最终门控。
+  \item \textbf{Graph 结构既是能力来源也是评测陷阱。}联合 trajectory 能改善 grounding，但 teacher forcing 会掩盖上游错误传播；必须使用 predicted-context 与 same-ID。
+  \item \textbf{专家组合可优于继续训练。}v0.43 没有新增模型参数，只通过固定节点级路由组合 Graph-A 与 MoL 的互补优势，取得当前最大后期增益。
+  \item \textbf{更多视觉监督并不自动更好。}提高 token、显式相机拓扑和 bbox 辅助均未晋级；辅助目标只有在与最终 graph/center-point 目标和采样分布一致时才可能有效。
 \end{enumerate}
 
-\section{定性展示与连续问答视频}
-为直观展示模型的感知—预测—规划输出，本项目从 nuScenes mini 连续 CAM\_FRONT 时间线生成两条 1080p 视频。画面持续播放；到关键帧时冻结，先出现问题，再显示真实 LoRA 输出，停留后恢复同一时间线。
+\section{工程复现与产物}
+\subsection{核心目录}
+\begin{lstlisting}
+reproduction/qwen_vl_v036/                 # 7B pure CE SFT
+reproduction/qwen_vl_v037b/                # conservative DPO + CE anchor
+reproduction/qwen_vl_v039_mol/             # four LoRA experts + controller
+reproduction/qwen_vl_v040_trajectory_rl/   # GRPO / GSPO
+reproduction/qwen_vl_v042_graph/           # Graph-SFT + rollout
+reproduction/qwen_vl_v043_internvl_transfer/ # fixed expert routing
+reproduction/qwen_vl_v044_spatial_bbox/    # topology/bbox negative ablation
+reproduction/drivelm_ds_eval/               # official-style local evaluator
+results/leaderboard/                        # complete machine-readable table
+\end{lstlisting}
+
+\subsection{关键复现命令}
+\begin{lstlisting}[language=bash]
+# Build scene-isolated six-camera data
+python reproduction/qwen_vl/build_dataset.py \\
+  --train-json /mnt/data/zzy/drivelm/data/QA_dataset_nus/v1_1_train_nus.json \\
+  --val-json /mnt/data/zzy/drivelm/data/QA_dataset_nus/v1_1_val_nus_q_only.json \\
+  --output-dir /mnt/data/zzy/drivelm/reproduction/qwen_vl \\
+  --seed 42 --dev-ratio 0.1
+
+# Build the promoted v0.43 fixed router output
+python reproduction/qwen_vl_v043_internvl_transfer/build_fixed_ensemble.py \\
+  --references-jsonl /mnt/data/zzy/drivelm/reproduction/qwen_vl_stage2_ablation_v1/qwen_v033_c00_dev.jsonl \\
+  --baseline-json /mnt/data/zzy/drivelm/reproduction/qwen_vl_v039_mol/sweep/checkpoint-700/mol_dev_predictions.json \\
+  --grounding-json /mnt/data/zzy/drivelm/reproduction/qwen_vl_v042_graph/rollout_checkpoint600/graph_dev_predictions.json \\
+  --mode anchor --output-json ensemble_predictions.json \\
+  --report-json build_report.json
+
+# Network-disabled semantic evaluation from an existing cache
+python reproduction/drivelm_ds_eval/evaluate_cache_only.py \\
+  --references-jsonl qwen_v033_c00_dev.jsonl \\
+  --predictions-json ensemble_predictions.json \\
+  --output-json drivelm_ds.json --cache-file deepseek_judge.sqlite
+\end{lstlisting}
+
+\subsection{可视化展示}
+项目生成连续驾驶视频：画面正常播放，在关键问题处冻结并弹出模型问答，再继续播放。视频用于展示 Agent 交互和答案格式，不替代 dev 定量指标；画面中的标注框均明确标识来源。
 
 \begin{figure}[H]
   \centering\includegraphics[width=0.92\textwidth]{qualitative_continuous_demos.jpg}
-  \caption{scene-0061 白天施工路口与 scene-1094 雨后夜间场景。彩色框来自 DriveLM annotation，不是 VLM 自行回归的检测框。}
+  \caption{两类昼夜场景的连续 DriveLM 问答展示。定性视频与定量 dev 评测严格分离。}
 \end{figure}
 
-两段视频使用的场景属于 SFT train split，画面右上角持续显示 \code{TRAIN-SPLIT QUALITATIVE DEMO}。因此它们用于验证交互效果和输出格式，不能作为 dev 泛化证据。真正的定量结果仍来自前述 77 个隔离场景。
-
-\section{官方 val 输出}
-官方 val 共有 15,480 条无答案问题。最终输出的 ID 数与输入逐项一致，唯一 ID 为 15,480，空答案为 0，schema 严格为 \code{id + answer}；其中 1,543 条被规范化为 A/B/C/D。文件 SHA-256 为：
-\begin{center}
-{\scriptsize\ttfamily\seqsplit{77bdaca3d8c777020b9f043ce607557e5275aef7929048f49ee15a8f17cb2185}}
-\end{center}
-由于官方 val 不公开答案，该文件只能上传 challenge evaluator 获得官方分数。本报告没有用本地 dev 数值替代或冒充官方 val/test 成绩。
-
-\section{局限性与下一阶段}
-\subsection{当前局限}
+\section{局限性与下一步}
 \begin{itemize}
-  \item 缺少 base model 未微调基线，不能仅凭当前实验严格量化 LoRA 带来的净提升；
-  \item 只有一个 seed 和一个主要配置，没有误差条或显著性检验；
-  \item 恢复 checkpoint 未保存 optimizer state，训练轨迹在第 3,000 步存在优化器状态断点；
-  \item 第 1--3,000 步的逐步 loss 日志不可用，当前只能审计恢复段累计平均值；
-  \item 六图视觉预算较低，对小行人、车辆细分类和像素坐标接地不利；
-  \item 当前经过评估的 DriveLM 模型是纯视觉模型，尚未把 nuScenes radar token 纳入同一受控实验；
-  \item 连续视频中的 bounding box 来自标注，仅作为解释层，不代表模型具备检测框回归能力。
+  \item 当前 Final 是 local dev + DeepSeek proxy，不是官方 hidden-server ChatGPT 分数；
+  \item 主要实验为单 seed，尚未通过多随机种子给出置信区间；
+  \item 单帧六相机难以可靠恢复真实速度、加速度和转向变化；
+  \item Graph-SFT 仍有 teacher-forcing exposure mismatch；
+  \item 当前主线是纯视觉 DriveLM，尚未把 radar token 纳入同一受控榜单；
+  \item v0.43 依赖多个 LoRA adapter 的固定路由，服务端需要 adapter 缓存或高效切换。
 \end{itemize}
 
-\subsection{推荐实验路线}
+推荐后续优先级：
 \begin{enumerate}
-  \item 在完全相同的 77-scene dev 上补跑 base、LoRA-v1、hard-task-v2 三组；
-  \item 保存 optimizer/scheduler state 与逐步原始 loss，至少运行 3 个 seed；
-  \item 提高视觉预算或对重要对象做 ROI crop，重点观察 object-ID F1；
-  \item 引入连续两到五帧和 ego speed/yaw，改善 behavior 与 collision reasoning；
-  \item 在相同 QA、split 和 evaluator 下增加 radar point/BEV encoder，进行 camera-only、radar-only、camera+radar 消融；
-  \item 将安全动作输出约束为结构化 schema，并在 CARLA 中加入 safety shield 后进行闭环评估。
+  \item 在官方 val/test 服务器验证 v0.43，建立 local proxy 与官方分数的相关性；
+  \item 对 Graph-SFT 使用 scheduled sampling 或 DAgger，把部分 gold context 替换为冻结模型预测；
+  \item 直接优化 graph-eligible Planning 或使用双门控 reward，避免 RL 子协议与全系统错位；
+  \item 对当前晋级链至少补充 3 个 seed，并报告 paired bootstrap 置信区间；
+  \item 在不改变六相机基线的前提下增加 radar encoder，严格比较 camera-only、radar-only 与 fusion；
+  \item 将最终 Planning 输出映射为结构化动作，并在 CARLA safety shield 下进行闭环验证。
 \end{enumerate}
 
-\section{复现命令摘要}
-\subsection{构建数据}
-\begin{lstlisting}[language=bash]
-python reproduction/qwen_vl/build_dataset.py \
-  --train-json /mnt/data/zzy/drivelm/data/QA_dataset_nus/v1_1_train_nus.json \
-  --val-json /mnt/data/zzy/drivelm/data/QA_dataset_nus/v1_1_val_nus_q_only.json \
-  --output-dir /mnt/data/zzy/drivelm/reproduction/qwen_vl \
-  --seed 42 --dev-ratio 0.1
-\end{lstlisting}
+\section{结论}
+RadarMind-DriveLM 已从“能运行的六相机 VQA 复现”演进为具有数据治理、分阶段训练、Graph rollout、系统级评测和公平晋级机制的自动驾驶 VLM Agent。最重要的工程结果不是某个单点算法，而是形成了可证伪的实验闭环：CE 建立垂域能力，保守 DPO 校准偏好，MoL 缓解任务冲突，RL 检查序列级优化，Graph-SFT暴露上游误差传播，最终用固定专家路由组合互补能力。
 
-\subsection{完整 LoRA SFT}
-\begin{lstlisting}[language=bash]
-CUDA_VISIBLE_DEVICES=1 python reproduction/qwen_vl/train.py \
-  --model-path /public/zzy/RadarMind/models/Qwen2.5-VL-3B-Instruct \
-  --train-jsonl /mnt/data/zzy/drivelm/reproduction/qwen_vl/qwen_train.jsonl \
-  --output-dir /mnt/data/zzy/drivelm/models/qwen2.5-vl-3b-drivelm-sixcam \
-  --device cuda:0 --batch-size 4 --gradient-accumulation-steps 1 \
-  --epochs 1 --learning-rate 2e-4 --save-steps 500
-\end{lstlisting}
-
-\subsection{开发集推理与评估}
-\begin{lstlisting}[language=bash]
-CUDA_VISIBLE_DEVICES=1 python reproduction/qwen_vl/infer.py \
-  --model-path /public/zzy/RadarMind/models/Qwen2.5-VL-3B-Instruct \
-  --adapter-path /mnt/data/zzy/drivelm/models/qwen2.5-vl-3b-drivelm-sixcam \
-  --input-jsonl /mnt/data/zzy/drivelm/reproduction/qwen_vl/qwen_dev.jsonl \
-  --output-json /mnt/data/zzy/drivelm/reproduction/qwen_vl/dev_predictions.json \
-  --device cuda:0 --max-new-tokens 256 --resume
-
-python reproduction/qwen_vl/evaluate_offline.py \
-  --references-jsonl /mnt/data/zzy/drivelm/reproduction/qwen_vl/qwen_dev.jsonl \
-  --predictions-json /mnt/data/zzy/drivelm/reproduction/qwen_vl/dev_predictions.json \
-  --output-json /mnt/data/zzy/drivelm/reproduction/qwen_vl/dev_metrics.json
-\end{lstlisting}
-
-\section{可审计产物}
-\begin{longtable}{p{0.34\textwidth}p{0.58\textwidth}}
-\toprule
-产物 & 路径或 SHA-256\\
-\midrule
-\endfirsthead
-\toprule
-产物 & 路径或 SHA-256\\
-\midrule
-\endhead
-最终 LoRA adapter & {\scriptsize\ttfamily\seqsplit{1473386e2f1d45b1d269c60216d064ebfff42a62f7d3418bd40cb37e14dcb67f}}\\
-Train JSONL & {\scriptsize\ttfamily\seqsplit{bb932b756c9bb3f62ca2b3e2b3940b1cac6ae763c08b47168edbe67ed6ea0028}}\\
-Dev JSONL & {\scriptsize\ttfamily\seqsplit{85a1b0fe3b69f84b9ec0cfe229f6eca781f31d29cfe0049de1b00b128b4ac7b4}}\\
-Dev predictions & {\scriptsize\ttfamily\seqsplit{74585c9b92dd5322568afaaf81e0e2cd802b23d6046b125abf485cc4225ecc89}}\\
-Dev metrics & \path{/mnt/data/zzy/drivelm/reproduction/qwen_vl/dev_metrics.json}\\
-Error analysis & \path{/mnt/data/zzy/drivelm/reproduction/qwen_vl/dev_error_analysis.json}\\
-Training report & \path{/mnt/data/zzy/drivelm/models/qwen2.5-vl-3b-drivelm-sixcam/training_report.json}\\
-Official val output & \path{/mnt/data/zzy/drivelm/reproduction/qwen_vl/official_val_output.json}\\
-\bottomrule
-\end{longtable}
+当前 v0.43 在本地完整协议上达到 \metric{0.612293}，相比零样本基模提升 0.354332；其 same-ID 增益证明提升并非来自 gating 子集变化。空间提示和 bbox 辅助的负结果也被完整保留，为后续 scheduled sampling、多模态雷达融合与 CARLA 闭环提供了明确边界。
 
 \section*{参考资料}
 \addcontentsline{toc}{section}{参考资料}
 \begin{enumerate}
-  \item Sima, C. et al. \textit{DriveLM: Driving with Graph Visual Question Answering}. arXiv:2312.14150, 2023; ECCV 2024.
+  \item Sima, C. et al. \textit{DriveLM: Driving with Graph Visual Question Answering}.\linebreak ECCV 2024; arXiv:2312.14150.
   \item Bai, S. et al. \textit{Qwen2.5-VL Technical Report}. arXiv:2502.13923, 2025.
   \item Caesar, H. et al. \textit{nuScenes: A Multimodal Dataset for Autonomous Driving}. CVPR 2020.
   \item Hu, E. J. et al. \textit{LoRA: Low-Rank Adaptation of Large Language Models}. ICLR 2022.
-  \item 本项目源码与复现说明：\path{/home/zhangzongyuan/Myproject/drivelm/DriveLM-main/docs/reproduction_qwen_vl.md}.
+  \item Rafailov, R. et al. \textit{Direct Preference Optimization: Your Language Model is Secretly a Reward Model}. NeurIPS 2023.
+  \item Shao, Z. et al. \textit{DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models}. arXiv:2402.03300, 2024（GRPO）.
+  \item Li, J., Li, Z., Lu, T. \textit{Driving with InternVL}. CVPR 2024 Autonomous Grand Challenge technical report.
+  \item OpenGVLab. \textit{InternVL: Scaling up Vision Foundation Models and Aligning for Generic Visual-Linguistic Tasks}. CVPR 2024.
 \end{enumerate}
 
 \appendix
-\section{指标源文件摘要}
-\begin{lstlisting}
-dev_metrics.json:
-  reference_count = 3355
-  prediction_count = 3355
-  matched_ids = 3355
-  coverage = 1.0
-  overall.exact_match = 0.4426229508
-  overall.token_f1 = 0.7333329023
-  overall.rouge_l = 0.7159499798
-  multiple_choice.accuracy = 0.8146067416
-\end{lstlisting}
+\section{版本与决策索引}
+\begin{longtable}{p{1.8cm}p{4.2cm}p{7.2cm}p{1.5cm}}
+\toprule
+版本 & 方法 & 主要证据 & 决策\\
+\midrule
+\endfirsthead
+\toprule
+版本 & 方法 & 主要证据 & 决策\\
+\midrule
+\endhead
+v0.31 & 3B 初始复现 & 打通数据、LoRA、dev、官方 val 输出 & 历史起点\\
+v0.36 & 7B CE-LoRA & Final 0.594636 & 晋级\\
+v0.37A & Standard DPO & Final 0.594300 & 拒绝\\
+v0.37B & Conservative DPO & Full 与 same-ID 均提高 & 晋级\\
+v0.38A & Grounding DPO & Final 0.592092 & 拒绝\\
+v0.39B & Four-expert MoL & Final 0.608245，controller 选 step 700 & 晋级\\
+v0.40 & GRPO / GSPO & Planning 子协议提高，全系统下降 & 拒绝\\
+v0.42A/B & Graph trajectory SFT & grounding 提高，same-ID 下降 & 拒绝\\
+v0.43 & Graph anchor + MoL & Full 0.612293；paired +0.000993 & 晋级\\
+v0.44 & topology / bbox auxiliary & 局部改善或整体退化 & 拒绝\\
+\bottomrule
+\end{longtable}
 
-\section{报告图表再生成}
+\section{v0.44 最新负实验明细}
+\begin{table}[H]
+\centering
+\caption{不调用外部 Judge 的 3,355-QA predicted-context 离线结果。}
+\begin{tabular}{lrrrrr}
+\toprule
+模型 & EM & Token-F1 & ROUGE-L & Planning F1 & MC\\
+\midrule
+Graph-A & 43.0402 & 73.0446 & 71.0026 & 58.3614 & 83.7079\\
+显式相机拓扑 & 43.5768 & 73.0125 & 71.0570 & 58.3903 & 83.4831\\
+相机拓扑+bbox & 43.0402 & 72.6065 & 70.6764 & 57.5701 & 83.3708\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+显式拓扑作为 v0.43 anchor 替代时，EM 和 MC 与当前系统相同，但 Token-F1 从 74.4813\% 降到 74.4793\%，ROUGE-L 从 72.3789\% 降到 72.3573\%，eligible 从 1,927 降到 1,910；因此无需消耗额外 API Judge 即可在冻结 pre-gate 淘汰。
+
+\section{报告再生成}
 \begin{lstlisting}[language=bash]
-cd /home/zhangzongyuan/Myproject/drivelm/DriveLM-main
-python reports/drivelm_reproduction_v1/generate_report_assets.py
-cd reports/drivelm_reproduction_v1
-xelatex -interaction=nonstopmode -halt-on-error \
-  drivelm_reproduction_technical_report.tex
-xelatex -interaction=nonstopmode -halt-on-error \
-  drivelm_reproduction_technical_report.tex
+cd /home/zhangzongyuan/Myproject/publish/radarmind-drivelm/reports/drivelm_reproduction_v1
+xelatex -interaction=nonstopmode -halt-on-error drivelm_reproduction_technical_report.tex
+xelatex -interaction=nonstopmode -halt-on-error drivelm_reproduction_technical_report.tex
 \end{lstlisting}
 \end{document}
