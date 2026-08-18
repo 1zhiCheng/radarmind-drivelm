@@ -1,0 +1,43 @@
+{
+  "note": "Offline labeled-dev metrics; not the official hidden-server score.",
+  "reference_count": 3355,
+  "prediction_count": 3355,
+  "matched_ids": 3355,
+  "coverage": 1.0,
+  "overall": {
+    "count": 3355,
+    "exact_match": 0.4399403874813711,
+    "token_f1": 0.7448129217505393,
+    "rouge_l": 0.7237887115227153
+  },
+  "by_task": {
+    "behavior": {
+      "count": 467,
+      "exact_match": 0.7408993576017131,
+      "token_f1": 0.7408993576017131,
+      "rouge_l": 0.7408993576017131
+    },
+    "perception": {
+      "count": 890,
+      "exact_match": 0.45617977528089887,
+      "token_f1": 0.8329277860830258,
+      "rouge_l": 0.7900006225027654
+    },
+    "planning": {
+      "count": 1399,
+      "exact_match": 0.19228020014295927,
+      "token_f1": 0.6147097854347925,
+      "rouge_l": 0.5968043398669343
+    },
+    "prediction": {
+      "count": 599,
+      "exact_match": 0.7595993322203672,
+      "token_f1": 0.9208057312786174,
+      "rouge_l": 0.908649919294504
+    }
+  },
+  "multiple_choice": {
+    "matched": 890,
+    "accuracy": 0.8449438202247191
+  }
+}

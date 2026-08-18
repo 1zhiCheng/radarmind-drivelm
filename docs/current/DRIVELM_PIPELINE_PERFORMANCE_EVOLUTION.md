@@ -115,6 +115,11 @@ trajectory 上选点，随后已将两种 RL policy 接回四专家 router，补
       <td>42.6230%</td><td>72.5647%</td><td>70.5456%</td><td>83.4831%</td>
       <td>70.6977</td><td>0.605430</td><td>same-ID -0.005678</td><td>✗ 未晋级</td>
     </tr>
+    <tr>
+      <td>InternVL-inspired ensemble</td><td><strong>v0.43 Graph anchor + MoL downstream</strong></td>
+      <td>3,355 fixed routing</td><td>43.9940%</td><td>74.4813%</td><td>72.3789%</td><td>84.4944%</td>
+      <td><strong>73.0197</strong></td><td><strong>0.612293</strong></td><td><strong>+0.004048</strong></td><td><strong>🏆 晋级</strong></td>
+    </tr>
   </tbody>
 </table>
 
@@ -166,12 +171,13 @@ Planning judge 和次排序 reward 上均更高。
 - 从 7B SFT 到 MoL，Final 累计提高 `+0.013609`，相对提高约 `+2.29%`。
 - 在 Planning trajectory 子协议中，GSPO-90 优于 MoL control 与 GRPO-70。
 - 完整协议中 GRPO/GSPO Final 为 0.606702/0.606640，均低于 MoL 0.608245，
-  所以 **MoL-700 继续作为全系统主线**。
+  所以 MoL-700 在 v0.40 阶段继续作为全系统主线。
 - v0.42A/B 完成真正的 P→Prediction→Planning→Behavior 串联训练和无 gold
   predicted-context rollout；A 的全量 Final 为 0.609998，但在 1,848 个 same-ID
   上下降 0.003428，B 在 1,827 个 same-ID 上下降 0.005678，均不晋级。
 - Graph-CE 将 coordinate F1 从 14.65% 提到 22.73%，但 Planning 下降；下一步
   应解决 teacher forcing 与预测上游上下文之间的 exposure mismatch。
+- v0.43 固定使用 Graph-A 生成每帧 anchor、MoL-700 生成全部 downstream QA；全量 Final 提升到 `0.612293`，1,848-ID paired Final 同样提升 `+0.000993`，因此成为新的全系统主线。
 
 ## 5. 补齐实验验收
 
@@ -181,3 +187,4 @@ Planning judge 和次排序 reward 上均更高。
 - [x] 两个 RL 候选与 MoL 的 graph-eligible ID 完全相同：1,911/1,911。
 - [x] same-ID 审计确认两者 Final 都严格下降，均不通过全系统晋级门槛。
 - [x] v0.42A/B：3,355/3,355 predicted-context coverage，judge 0 failures，same-ID 均未通过。
+- [x] v0.43：3,355/3,355 coverage，791/791 cache-only judge；全量与 same-ID Final 均严格提高，全部 paired gates 通过。

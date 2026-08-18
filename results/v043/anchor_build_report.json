@@ -1,0 +1,21 @@
+{
+  "schema_version": "drivelm-v043-fixed-ensemble-v1",
+  "mode": "anchor",
+  "selection_rule": "Graph-A for frame anchor",
+  "answer_or_reference_dependent_routing": false,
+  "reference_count": 3355,
+  "output_count": 3355,
+  "route_counts": {
+    "baseline": 2888,
+    "grounding": 467
+  },
+  "grounding_by_reason": {
+    "anchor": 467,
+    "tag3_non_anchor": 0
+  },
+  "sources": {
+    "baseline": "/mnt/data/zzy/drivelm/reproduction/qwen_vl_v039_mol/sweep/checkpoint-700/mol_dev_predictions.json",
+    "grounding": "/mnt/data/zzy/drivelm/reproduction/qwen_vl_v042_graph/rollout_checkpoint600/graph_dev_predictions.json",
+    "references": "/mnt/data/zzy/drivelm/reproduction/qwen_vl_stage2_ablation_v1/qwen_v033_c00_dev.jsonl"
+  }
+}

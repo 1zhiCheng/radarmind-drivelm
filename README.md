@@ -81,16 +81,17 @@ leaderboard columns: `accuracy`, semantic judge, BLEU-1..4, ROUGE-L, CIDEr,
 Match and Final. The local semantic column uses DeepSeek-V4-Flash instead of
 the unavailable official GPT judge, so these remain DriveLM-DS proxy scores.
 
-[View the complete 12-model official-style table](results/leaderboard/README.md)
+[View the complete 13-model official-style table](results/leaderboard/README.md)
 · [machine-readable metrics](results/leaderboard/official_style_metrics.json)
 
 | rank | id | accuracy | judge* | ROUGE-L | CIDEr | match | final_score | decision |
 | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
-| 1 | v0.42A Graph-CE | 0.802691 | 71.2974 | 0.724571 | 0.198875 | 34.0947 | **0.609998** | Rejected by same-ID audit |
-| 2 | **v0.39B MoL-700** | **0.808735** | **72.4769** | 0.723957 | **0.200502** | 30.7513 | **0.608245** | **🏆 Current baseline** |
-| 3 | v0.40 GRPO-70 | **0.808735** | 72.0910 | 0.723957 | **0.200502** | 30.7513 | 0.606702 | Rejected by Final |
-| 4 | v0.40 GSPO-90 | **0.808735** | 72.0756 | 0.723957 | **0.200502** | 30.7513 | 0.606640 | Rejected by Final |
-| 5 | v0.42B Graph + anchors | 0.795107 | 70.6977 | 0.722131 | 0.196251 | **34.1263** | 0.605430 | Rejected |
+| 1 | **v0.43 Graph-anchor + MoL downstream** | **0.813154** | **73.0197** | **0.724571** | 0.198875 | 30.7513 | **0.612293** | **🏆 Current baseline** |
+| 2 | v0.42A Graph-CE | 0.802691 | 71.2974 | 0.724571 | 0.198875 | 34.0947 | **0.609998** | Rejected by same-ID audit |
+| 3 | **v0.39B MoL-700** | **0.808735** | **72.4769** | 0.723957 | **0.200502** | 30.7513 | **0.608245** | Promoted MoL component |
+| 4 | v0.40 GRPO-70 | **0.808735** | 72.0910 | 0.723957 | **0.200502** | 30.7513 | 0.606702 | Rejected by Final |
+| 5 | v0.40 GSPO-90 | **0.808735** | 72.0756 | 0.723957 | **0.200502** | 30.7513 | 0.606640 | Rejected by Final |
+| 6 | v0.42B Graph + anchors | 0.795107 | 70.6977 | 0.722131 | 0.196251 | **34.1263** | 0.605430 | Rejected |
 
 `judge*` is the local DeepSeek proxy for the official `chatgpt` column. Rank is
 the raw candidate-dependent Final ordering; checkpoint promotion additionally
@@ -116,6 +117,7 @@ selection does not count as full-system promotion.
     <tr><td>GSPO-90</td><td>3,355 all-task</td><td>43.7854%</td><td>74.0246%</td><td>72.0756</td><td>0.606640</td><td>Rejected by Final</td></tr>
     <tr><td rowspan="2">Graph trajectory SFT</td><td>v0.42A pure Graph-CE</td><td>3,355 predicted-context</td><td>43.0402%</td><td>73.0446%</td><td>71.2974</td><td>0.609998</td><td>Rejected by same-ID</td></tr>
     <tr><td>v0.42B Graph + CE anchors</td><td>3,355 predicted-context</td><td>42.6230%</td><td>72.5647%</td><td>70.6977</td><td>0.605430</td><td>Rejected</td></tr>
+    <tr><td>InternVL-inspired ensemble</td><td><strong>v0.43 Graph anchor + MoL downstream</strong></td><td>3,355 fixed routing</td><td>--</td><td>--</td><td><strong>73.0197</strong></td><td><strong>0.612293</strong></td><td><strong>🏆 Promoted</strong></td></tr>
   </tbody>
 </table>
 
@@ -135,8 +137,7 @@ chosen for full evaluation even though it ultimately failed system promotion:
 
 Raw-to-SFT Final rises from **0.257961 to 0.594636**; SFT-to-MoL rises further
 to **0.608245** (+2.29% relative after SFT). Full-system GRPO/GSPO obtain
-0.606702/0.606640 and fail the strict Final and same-ID gates. MoL-700 therefore
-remains the promoted system. All three share exactly 1,911 eligible IDs, so this
+0.606702/0.606640 and fail the strict Final and same-ID gates. MoL-700 therefore remained the promoted system through v0.42. v0.43 then combines its downstream experts with the Graph-A frame anchor and becomes the new promoted system. All three share exactly 1,911 eligible IDs, so this
 negative result is not caused by graph gating coverage.
 
 Formulas, complete metrics and audit details are documented in the
@@ -292,9 +293,17 @@ requires scheduled sampling or DAgger to avoid Planning exposure mismatch. See
 the [full v0.42 report](docs/current/VERSION_0_42_DRIVELM_GRAPH_TRAJECTORY_SFT.md)
 and [reproduction code](reproduction/qwen_vl_v042_graph/).
 
+### v0.43 InternVL-inspired fixed anchor ensemble
+
+v0.43 transfers the complementary-ensemble insight from the CVPR 2024 InternVL4Drive champion report. A deterministic node router uses Graph-A for each frame's first important-object anchor (467 QA) and MoL-700 for all 2,888 downstream QA. No dev label, candidate text or confidence is used by the router.
+
+Full DriveLM-DS improves from **0.608245 to 0.612293** with 3,355/3,355 coverage and 791/791 network-disabled Judge cache hits. On the exact 1,848 common eligible IDs, Final also improves from **0.609563 to 0.610557** while Planning, Accuracy, MC and Match remain identical; every frozen paired gate passes. v0.43 therefore becomes the new local full-system baseline.
+
+See the [technical report](docs/current/VERSION_0_43_DRIVELM_INTERNVL_TRANSFER_ENSEMBLE.md), [two-page PDF](reports/v043_internvl_transfer/technical_report.pdf), [reproduction code](reproduction/qwen_vl_v043_internvl_transfer/) and [machine-readable result](results/v043/summary.json).
+
 ## Project status and TODO
 
-Active route: single-frame six-camera DriveLM-nuScenes, with v0.39B MoL step 700 retained as the promoted full-system baseline. GSPO-90 and v0.42A/B Graph-SFT are preserved as controlled negative full-system results; the next Graph iteration targets predicted-upstream scheduled sampling rather than more teacher-forced steps.
+Active route: single-frame six-camera DriveLM-nuScenes, with v0.43 fixed Graph-anchor + MoL-downstream routing as the promoted full-system baseline (Final 0.612293). GSPO-90 and v0.42A/B Graph-SFT are preserved as controlled negative full-system results; the next Graph iteration targets predicted-upstream scheduled sampling rather than more teacher-forced steps.
 
 - [x] Prepare the **26,095 train / 3,355 scene-isolated dev** dataset.
 - [x] Complete B00/B10/B11 CE-LoRA training and evaluation.

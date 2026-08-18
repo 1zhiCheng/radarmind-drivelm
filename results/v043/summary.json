@@ -1,0 +1,66 @@
+{
+  "schema_version": "radarmind-drivelm-v043-internvl-transfer-v1",
+  "inspiration": {
+    "method": "InternVL4Drive",
+    "transferred_principle": "fixed complementary model ensemble",
+    "not_claimed": "parameter-level InternVL reproduction or official hidden-server score"
+  },
+  "candidate": {
+    "id": "v0.43-graph-anchor-mol-downstream",
+    "routing": {
+      "graph_a": "qa_index == 0",
+      "mol_700": "qa_index > 0",
+      "graph_a_count": 467,
+      "mol_700_count": 2888,
+      "answer_dependent": false,
+      "reference_dependent": false
+    }
+  },
+  "full_3355": {
+    "coverage": 1,
+    "eligible": 1927,
+    "judge_complete": "791/791",
+    "judge_cache_hits": 791,
+    "network_calls": 0,
+    "accuracy": 0.8131539611360239,
+    "semantic_judge_100": 73.01972685887709,
+    "language": {
+      "Bleu_1": 0.7896344047130698,
+      "Bleu_2": 0.7247702689692278,
+      "Bleu_3": 0.6650987852032896,
+      "Bleu_4": 0.6075200657466633,
+      "ROUGE_L": 0.7245705232421031,
+      "CIDEr": 0.198874789197518,
+      "combined": 0.4804046277733059
+    },
+    "match_100": 30.751262503367006,
+    "final": 0.6122931502241084,
+    "baseline_final": 0.6082448326044415,
+    "delta_final": 0.004048317619666842,
+    "offline": {
+      "exact_match": 0.4399403874813711,
+      "token_f1": 0.7448129217505393,
+      "rouge_l_f1": 0.7237887115227153,
+      "mc_accuracy": 0.8449438202247191
+    }
+  },
+  "same_id_1848": {
+    "baseline_final": 0.6095634989386678,
+    "candidate_final": 0.6105565122548361,
+    "delta_final": 0.0009930133161683008,
+    "planning_delta_100": 0,
+    "accuracy_delta": 0,
+    "mc_accuracy_delta": 0,
+    "coordinate_f1_delta": 0,
+    "match_delta_100": 0,
+    "language_delta": 0.004965066580841393,
+    "token_f1_delta": -0.0009685238985553957,
+    "local_rouge_l_f1_delta": -0.00047358341234615686,
+    "paired_audit_passed": true
+  },
+  "decision": {
+    "promoted": true,
+    "new_local_full_system_baseline": "v0.43-graph-anchor-mol-downstream",
+    "requires_official_hidden_server_validation": true
+  }
+}

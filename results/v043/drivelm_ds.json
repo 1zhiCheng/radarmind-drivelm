@@ -1,0 +1,266 @@
+{
+  "protocol": {
+    "name": "DriveLM-DS",
+    "description": "Public DriveLM metric structure with DeepSeek semantic judge; not hidden-server score.",
+    "judge_model": "deepseek-v4-flash",
+    "judge_prompt_version": "drivelm-deepseek-judge-v1",
+    "thinking": "disabled",
+    "temperature": 0,
+    "graph_gating": "public challenge/evaluation.py compatible"
+  },
+  "inputs": {
+    "references": "/mnt/data/zzy/drivelm/reproduction/qwen_vl_stage2_ablation_v1/qwen_v033_c00_dev.jsonl",
+    "predictions": "/mnt/data/zzy/drivelm/reproduction/qwen_vl_v043_internvl_transfer/anchor/ensemble_predictions.json",
+    "reference_count": 3355,
+    "prediction_count": 3355,
+    "missing_count": 0,
+    "extra_count": 0,
+    "missing_ids": [],
+    "extra_ids": []
+  },
+  "gating": {
+    "eligible_count": 1927,
+    "gated_out_count": 1428,
+    "eligible_by_tag": {
+      "0": 669,
+      "1": 659,
+      "2": 467,
+      "3": 132
+    }
+  },
+  "judge": {
+    "required": 791,
+    "requested": 791,
+    "completed": 791,
+    "cache_hits": 791,
+    "failures": [],
+    "complete": true,
+    "smoke_limit": 0,
+    "sample_results": {
+      "f0f120e4d4b0441da90ec53b16ee169d_dfb8d8959b9944d69dcec6d05e419f04_2": {
+        "score": 40,
+        "semantic_correctness": 40,
+        "action_correctness": 100,
+        "object_state_correctness": 20,
+        "format_valid": true,
+        "brief_reason": "The candidate correctly identifies the ego action (continue ahead at same speed) for all objects, but misidentifies the objects and their states: it labels c3 as a traffic sign (reference says stationary), and c1 and c2 as going ahead (reference says c2 is turning left and c1 is going ahead). Also, the camera for c3 is wrong (CAM_FRONT vs CAM_BACK).",
+        "cache_hit": true,
+        "system_fingerprint": "a26a7955944dc5c60445bff77fac9c8e"
+      },
+      "b829278aae2747959f2a95423455bbcb_c04ada66550443a79301167ec1ea42f7_5": {
+        "score": 100,
+        "semantic_correctness": 100,
+        "action_correctness": 100,
+        "object_state_correctness": 100,
+        "format_valid": true,
+        "brief_reason": "The candidate exactly matches the reference: maintain speed and decelerate gradually without braking.",
+        "cache_hit": true,
+        "system_fingerprint": "fp_a18b46594c_prod0820_fp8_kvcache_20260402"
+      },
+      "f0f120e4d4b0441da90ec53b16ee169d_4a0798f849ca477ab18009c3a20b7df2_6": {
+        "score": 100,
+        "semantic_correctness": 100,
+        "action_correctness": 100,
+        "object_state_correctness": 100,
+        "format_valid": true,
+        "brief_reason": "The candidate exactly matches the reference, indicating identical action and state.",
+        "cache_hit": true,
+        "system_fingerprint": "fp_a18b46594c_prod0820_fp8_kvcache_20260402"
+      },
+      "b829278aae2747959f2a95423455bbcb_c04ada66550443a79301167ec1ea42f7_1": {
+        "score": 40,
+        "semantic_correctness": 40,
+        "action_correctness": 100,
+        "object_state_correctness": 0,
+        "format_valid": true,
+        "brief_reason": "The candidate identifies the same three objects but assigns incorrect states to two of them (c2 and c1 are described as 'going ahead' instead of 'stationary'), and the camera views for c1 and c3 are swapped. The ego action is correct in all cases.",
+        "cache_hit": true,
+        "system_fingerprint": "a26a7955944dc5c60445bff77fac9c8e"
+      },
+      "f0f120e4d4b0441da90ec53b16ee169d_4a0798f849ca477ab18009c3a20b7df2_2": {
+        "score": 40,
+        "semantic_correctness": 40,
+        "action_correctness": 100,
+        "object_state_correctness": 20,
+        "format_valid": true,
+        "brief_reason": "The candidate correctly identifies the ego action (keep going ahead) for all three objects, but misidentifies the object states: it says all are 'going ahead' whereas the reference specifies a traffic sign, a left-turning vehicle, and a going-ahead vehicle. Also, the camera and coordinates for the first two objects are incorrect (c3 should be CAM_FRONT but coordinates differ; c2 should be CAM_BACK but candidate says CAM_FRONT).",
+        "cache_hit": true,
+        "system_fingerprint": "a26a7955944dc5c60445bff77fac9c8e"
+      },
+      "1977a1c98a6c4eb79fbc2a6dc0da9b0f_7903e67446c64958b0a660f10bdadf19_5": {
+        "score": 100,
+        "semantic_correctness": 100,
+        "action_correctness": 100,
+        "object_state_correctness": 100,
+        "format_valid": true,
+        "brief_reason": "The candidate exactly matches the reference: maintain speed and decelerate gradually without braking.",
+        "cache_hit": true,
+        "system_fingerprint": "fp_a18b46594c_prod0820_fp8_kvcache_20260402"
+      },
+      "b829278aae2747959f2a95423455bbcb_634cc5f8d02740ec877154a67599d159_5": {
+        "score": 70,
+        "semantic_correctness": 70,
+        "action_correctness": 70,
+        "object_state_correctness": 70,
+        "format_valid": true,
+        "brief_reason": "Candidate captures the core actions of maintaining speed and gradual deceleration without braking, but omits the backup, left offset, and accelerate-and-go-ahead maneuvers, which are meaningful omissions.",
+        "cache_hit": true,
+        "system_fingerprint": "fp_a18b46594c_prod0820_fp8_kvcache_20260402"
+      },
+      "b829278aae2747959f2a95423455bbcb_b00f16b952c74369be05edbeacd815bb_4": {
+        "score": 100,
+        "semantic_correctness": 100,
+        "action_correctness": 100,
+        "object_state_correctness": 100,
+        "format_valid": true,
+        "brief_reason": "The candidate exactly matches the reference, indicating identical action and state.",
+        "cache_hit": true,
+        "system_fingerprint": "fp_a18b46594c_prod0820_fp8_kvcache_20260402"
+      },
+      "df8dfada99a04a81bd1b102eeb84e9bc_5d76d048762e4f12bd814d456e5776b0_5": {
+        "score": 95,
+        "semantic_correctness": 95,
+        "action_correctness": 95,
+        "object_state_correctness": 90,
+        "format_valid": true,
+        "brief_reason": "The candidate correctly suggests gradual deceleration without braking, matching the reference. The addition of 'keep going at the same speed' is slightly contradictory but does not undermine the main action.",
+        "cache_hit": true,
+        "system_fingerprint": "fp_a18b46594c_prod0820_fp8_kvcache_20260402"
+      },
+      "1977a1c98a6c4eb79fbc2a6dc0da9b0f_0a208b6bd70a45c9b77b4acff048b2e4_5": {
+        "score": 85,
+        "semantic_correctness": 90,
+        "action_correctness": 80,
+        "object_state_correctness": 85,
+        "format_valid": true,
+        "brief_reason": "The candidate conveys the same intent (maintain speed then decelerate to stop) but uses 'decelerate gradually without braking' which is slightly contradictory since deceleration typically involves braking. Minor wording difference.",
+        "cache_hit": true,
+        "system_fingerprint": "fp_a18b46594c_prod0820_fp8_kvcache_20260402"
+      },
+      "df8dfada99a04a81bd1b102eeb84e9bc_1f1309a70c89443fbf02b5bb96359d52_4": {
+        "score": 100,
+        "semantic_correctness": 100,
+        "action_correctness": 100,
+        "object_state_correctness": 100,
+        "format_valid": true,
+        "brief_reason": "The candidate exactly matches the reference, indicating identical action and state.",
+        "cache_hit": true,
+        "system_fingerprint": "fp_a18b46594c_prod0820_fp8_kvcache_20260402"
+      },
+      "1977a1c98a6c4eb79fbc2a6dc0da9b0f_a59f97b9ba4b451e92487285f27ffb52_1": {
+        "score": 20,
+        "semantic_correctness": 20,
+        "action_correctness": 20,
+        "object_state_correctness": 20,
+        "format_valid": true,
+        "brief_reason": "The candidate misidentifies all objects (camera and coordinates), assigns incorrect states (moving vs stationary), and recommends unsafe actions (going ahead when reference says remain stationary).",
+        "cache_hit": true,
+        "system_fingerprint": "a26a7955944dc5c60445bff77fac9c8e"
+      },
+      "f0f120e4d4b0441da90ec53b16ee169d_dfb8d8959b9944d69dcec6d05e419f04_6": {
+        "score": 60,
+        "semantic_correctness": 60,
+        "action_correctness": 60,
+        "object_state_correctness": 60,
+        "format_valid": true,
+        "brief_reason": "The candidate correctly suggests maintaining speed but incorrectly adds deceleration, contradicting the reference's instruction to accelerate.",
+        "cache_hit": true,
+        "system_fingerprint": "fp_a18b46594c_prod0820_fp8_kvcache_20260402"
+      },
+      "df8dfada99a04a81bd1b102eeb84e9bc_0545b9cffcb441769be5f769fad6986d_5": {
+        "score": 70,
+        "semantic_correctness": 70,
+        "action_correctness": 70,
+        "object_state_correctness": 70,
+        "format_valid": true,
+        "brief_reason": "Candidate keeps speed but adds gradual deceleration, which is not in reference; lacks left offset. Mostly correct but with a meaningful omission.",
+        "cache_hit": true,
+        "system_fingerprint": "fp_a18b46594c_prod0820_fp8_kvcache_20260402"
+      },
+      "f0f120e4d4b0441da90ec53b16ee169d_ffd1bdf020d145759224c629b501d2b2_5": {
+        "score": 100,
+        "semantic_correctness": 100,
+        "action_correctness": 100,
+        "object_state_correctness": 100,
+        "format_valid": true,
+        "brief_reason": "The candidate exactly matches the reference, indicating identical action and state.",
+        "cache_hit": true,
+        "system_fingerprint": "fp_a18b46594c_prod0820_fp8_kvcache_20260402"
+      },
+      "df8dfada99a04a81bd1b102eeb84e9bc_af1b60ce78fd4c6a9cd3259070ab9c52_5": {
+        "score": 85,
+        "semantic_correctness": 90,
+        "action_correctness": 80,
+        "object_state_correctness": 85,
+        "format_valid": true,
+        "brief_reason": "The candidate correctly instructs to maintain speed and turn left, but adds 'decelerate gradually without braking' which is a minor deviation from the reference's 'same speed' instruction.",
+        "cache_hit": true,
+        "system_fingerprint": "fp_a18b46594c_prod0820_fp8_kvcache_20260402"
+      },
+      "1977a1c98a6c4eb79fbc2a6dc0da9b0f_b6bf5a2bcb094969ace1023f8fe0b9e2_5": {
+        "score": 20,
+        "semantic_correctness": 20,
+        "action_correctness": 20,
+        "object_state_correctness": 20,
+        "format_valid": true,
+        "brief_reason": "Candidate contradicts reference by not braking and continuing at same speed, which is unsafe and incorrect.",
+        "cache_hit": true,
+        "system_fingerprint": "fp_a18b46594c_prod0820_fp8_kvcache_20260402"
+      },
+      "df8dfada99a04a81bd1b102eeb84e9bc_e3f986e5d53f416492bdf255e82bff52_5": {
+        "score": 85,
+        "semantic_correctness": 90,
+        "action_correctness": 80,
+        "object_state_correctness": 85,
+        "format_valid": true,
+        "brief_reason": "The candidate correctly maintains speed but adds a gradual deceleration, which is a minor deviation from the reference's explicit 'same speed' instruction. It does not contradict safety and is mostly equivalent.",
+        "cache_hit": true,
+        "system_fingerprint": "fp_a18b46594c_prod0820_fp8_kvcache_20260402"
+      },
+      "1977a1c98a6c4eb79fbc2a6dc0da9b0f_a59f97b9ba4b451e92487285f27ffb52_5": {
+        "score": 60,
+        "semantic_correctness": 60,
+        "action_correctness": 60,
+        "object_state_correctness": 60,
+        "format_valid": true,
+        "brief_reason": "The candidate keeps speed but suggests gradual deceleration instead of sudden braking, which is a meaningful deviation from the reference action.",
+        "cache_hit": true,
+        "system_fingerprint": "fp_a18b46594c_prod0820_fp8_kvcache_20260402"
+      },
+      "df8dfada99a04a81bd1b102eeb84e9bc_3a171478d2d448ba9f8fc44c7df60a5a_5": {
+        "score": 100,
+        "semantic_correctness": 100,
+        "action_correctness": 100,
+        "object_state_correctness": 100,
+        "format_valid": true,
+        "brief_reason": "The candidate exactly matches the reference, indicating identical action and state.",
+        "cache_hit": true,
+        "system_fingerprint": "fp_a18b46594c_prod0820_fp8_kvcache_20260402"
+      }
+    }
+  },
+  "metrics": {
+    "accuracy": 0.8131539611360239,
+    "accuracy_count": 669,
+    "planning_deepseek_100": 73.01972685887709,
+    "planning_judged_count": 659,
+    "language_raw": {
+      "Bleu_1": 0.7896344047130698,
+      "Bleu_2": 0.7247702689692278,
+      "Bleu_3": 0.6650987852032896,
+      "Bleu_4": 0.6075200657466633,
+      "ROUGE_L": 0.7245705232421031,
+      "CIDEr": 0.198874789197518
+    },
+    "language_combined": 0.4804046277733059,
+    "language_count": 467,
+    "coordinate_precision_macro": 0.14646464597643097,
+    "coordinate_recall_macro": 0.14646464597643097,
+    "coordinate_f1_macro": 0.146464644006734,
+    "coordinate_count": 132,
+    "graph_deepseek_100": 46.85606060606061,
+    "graph_judged_count": 132,
+    "match_score_100": 30.751262503367006,
+    "drivelm_ds_final": 0.6122931502241084
+  }
+}
