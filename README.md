@@ -74,6 +74,28 @@ The active leaderboard path is camera-only and single-frame. Radar, LiDAR, map, 
 
 ## Results
 
+### Official-style local leaderboard
+
+The retained full-dev evaluations are now also reported with the public
+leaderboard columns: `accuracy`, semantic judge, BLEU-1..4, ROUGE-L, CIDEr,
+Match and Final. The local semantic column uses DeepSeek-V4-Flash instead of
+the unavailable official GPT judge, so these remain DriveLM-DS proxy scores.
+
+[View the complete 12-model official-style table](results/leaderboard/README.md)
+· [machine-readable metrics](results/leaderboard/official_style_metrics.json)
+
+| rank | id | accuracy | judge* | ROUGE-L | CIDEr | match | final_score | decision |
+| ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| 1 | v0.42A Graph-CE | 0.802691 | 71.2974 | 0.724571 | 0.198875 | 34.0947 | **0.609998** | Rejected by same-ID audit |
+| 2 | **v0.39B MoL-700** | **0.808735** | **72.4769** | 0.723957 | **0.200502** | 30.7513 | **0.608245** | **🏆 Current baseline** |
+| 3 | v0.40 GRPO-70 | **0.808735** | 72.0910 | 0.723957 | **0.200502** | 30.7513 | 0.606702 | Rejected by Final |
+| 4 | v0.40 GSPO-90 | **0.808735** | 72.0756 | 0.723957 | **0.200502** | 30.7513 | 0.606640 | Rejected by Final |
+| 5 | v0.42B Graph + anchors | 0.795107 | 70.6977 | 0.722131 | 0.196251 | **34.1263** | 0.605430 | Rejected |
+
+`judge*` is the local DeepSeek proxy for the official `chatgpt` column. Rank is
+the raw candidate-dependent Final ordering; checkpoint promotion additionally
+requires the frozen same-ID fairness gates.
+
 ### End-to-end promotion chain
 
 All rows below now use the same 3,355-QA local dev and complete local DriveLM-DS
